@@ -4,6 +4,9 @@
 import gtk
 import hildon
 
+import operations
+from stack import OpStack
+
 def button(label, onclicked=None):
     button = hildon.GtkButton(gtk.HILDON_SIZE_AUTO)
     button.set_label(str(label))
@@ -38,10 +41,10 @@ class MyApp(hildon.Program):
         vbox.pack_start(input)
         vbox.pack_end(hbox)
 
-        self.stack = []
         self.w_stack = stack.get_buffer()
         self.w_input = input
         self.w_keypad = keypad
+        self.stack = OpStack(self.w_stack)
 
         #self.window.set_app_menu(menu_bar)
         #self.window.add(label)
@@ -52,6 +55,13 @@ class MyApp(hildon.Program):
 
     def create_menu(self):
         pass
+
+    def hit_opkey(self, b):
+        op = b.get_label()
+        text = self.w_input.get_text()
+        if text:
+            self.stack.push_op(text)
+        self.w_input.set_text(op)
 
     def hit_digit(self, b):
         self.w_input.insert_text(b.get_label(), -1)
@@ -68,10 +78,10 @@ class MyApp(hildon.Program):
     def hit_push_stack(self, b):
         text = self.w_input.get_text()
         self.w_input.set_text('')
-        self.stack_push(text)
+        self.stack.push(text)
 
     def hit_pop_stack(self, b):
-        text = self.stack_pop()
+        text = self.stack.pop()
         if text:
             self.w_input.set_text(text)
             self.w_input.set_position(-1)
@@ -82,17 +92,6 @@ class MyApp(hildon.Program):
         banner = hildon.hildon_banner_show_information(self.window, '', text)
         banner.set_timeout(timeout)
         return banner
-
-    def stack_push(self, data):
-        iter = self.w_stack.get_iter_at_line(0)
-        self.w_stack.insert(iter, str(data) + '\n')
-
-    def stack_pop(self):
-        start = self.w_stack.get_iter_at_line(0)
-        end = self.w_stack.get_iter_at_line(1)
-        text = self.w_stack.get_text(start, end)
-        self.w_stack.delete(start, end)
-        return text.strip()
 
     def create_keypad(self):
         buttons_box = gtk.Table(5, 8, homogeneous=True)
@@ -119,7 +118,7 @@ class MyApp(hildon.Program):
 
         # Basic operations
         for i, c in enumerate(u'↑÷×−+'):
-            b = button(c)
+            b = button(c, self.hit_opkey)
             buttons_box.attach(b, 5, 6, i, i+1)
 
 
@@ -131,11 +130,11 @@ class MyApp(hildon.Program):
 
         # Binary operations
         for i, c in enumerate(('xor', 'and\nnot', 'and', 'not', 'or')):
-            b = button(c)
+            b = button(c, self.hit_opkey)
             buttons_box.attach(b, 6, 7, i, i+1)
 
         for i, c in enumerate(('<<', '>>')):
-            b = button(c)
+            b = button(c, self.hit_opkey)
             buttons_box.attach(b, 7, 8, i, i+1)
 
         b = button('Fill')
