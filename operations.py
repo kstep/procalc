@@ -10,10 +10,10 @@ def operation(name, prio, *types):
         def wrapper(stack):
             try:
                 args = (t(stack.pop_op()) for t in types)
+                result = func(*args)
             except ValueError, e:
                 raise OperationError("Arguments type mismatch for %s%s" % (name, types))
 
-            result = func(*args)
             if result is None:
                 pass
             elif isinstance(result, tuple):

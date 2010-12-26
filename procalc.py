@@ -5,6 +5,7 @@ import gtk
 import hildon
 
 import operations
+from operations import OperationError
 from stack import OpStack
 
 def button(label, onclicked=None):
@@ -61,7 +62,12 @@ class MyApp(hildon.Program):
         text = self.w_input.get_text()
         if text:
             self.stack.push_op(text)
-        result = self.stack.pop_op()
+        try:
+            result = self.stack.pop_op()
+        except OperationError, e:
+            self.message(e.message, 2000)
+            return
+
         self.w_input.set_text(str(result))
         self.w_input.set_position(-1)
 
