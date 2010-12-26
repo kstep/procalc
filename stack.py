@@ -63,7 +63,12 @@ class OpStack(object):
     def push_op(self, op):
         pri = self.ops.get(op, op_noop).op_prio
         idx = 0
-        while self.ops.get(self[idx], op_noop).op_prio > pri:
+        while True:
+            item = self.get(idx)
+            if not item:
+                break
+            if self.ops.get(item, op_noop).op_prio <= pri:
+                break
             idx += 1
         self.push(op, idx)
 
