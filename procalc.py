@@ -6,7 +6,7 @@ import hildon
 
 import operations
 from operations import OperationError
-from stack import OpStack
+from stack import OpStack, StackError
 
 def button(label, onclicked=None):
     button = hildon.GtkButton(gtk.HILDON_SIZE_AUTO)
@@ -66,7 +66,7 @@ class MyApp(hildon.Program):
             self.stack.push_op(text)
         try:
             result = self.stack.pop_op()
-        except OperationError, e:
+        except (StackError, OperationError), e:
             self.message(e.message, 2000)
             return
 
@@ -113,15 +113,20 @@ class MyApp(hildon.Program):
     def hit_push_stack(self, b):
         text = self.w_input.get_text()
         self.w_input.set_text('')
-        self.stack.push(text)
+        try:
+            self.stack.push(text)
+        except StackError, e:
+            self.message(e.message)
 
     def hit_pop_stack(self, b):
-        text = self.stack.pop()
-        if text:
-            self.w_input.set_text(text)
-            self.w_input.set_position(-1)
-        else:
-            self.message('Stack is empty!')
+        try:
+            text = self.stack.pop()
+        except StackError, e:
+            self.message(e.message)
+            return
+
+        self.w_input.set_text(text)
+        self.w_input.set_position(-1)
 
     def message(self, text, timeout=500):
         banner = hildon.hildon_banner_show_information(self.window, '', text)
@@ -201,5 +206,4 @@ class MyApp(hildon.Program):
 if __name__ == '__main__':
     app = MyApp()
     app.run()
-
 
