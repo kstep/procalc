@@ -57,6 +57,14 @@ class MyApp(hildon.Program):
     def create_menu(self):
         pass
 
+    def hit_execute(self, b):
+        text = self.w_input.get_text()
+        if text:
+            self.stack.push_op(text)
+        result = self.stack.pop_op()
+        self.w_input.set_text(str(result))
+        self.w_input.set_position(-1)
+
     def hit_opkey(self, b):
         op = b.get_label()
         text = self.w_input.get_text()
@@ -131,7 +139,6 @@ class MyApp(hildon.Program):
             b = button(c, self.hit_opkey)
             buttons_box.attach(b, 5, 6, i, i+1)
 
-
         # Stack operations
         hooks = [self.hit_push_stack, self.hit_pop_stack]
         for i, c in enumerate((u'st↓', u'st↑')):
@@ -151,7 +158,7 @@ class MyApp(hildon.Program):
         buttons_box.attach(b, 7, 8, 2, 3)
 
         # Execute
-        b = button('=')
+        b = button('=', self.hit_execute)
         buttons_box.attach(b, 7, 8, 3, 5)
 
         # Special mode keys
