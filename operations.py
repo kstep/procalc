@@ -19,7 +19,7 @@ def operation(name, prio, *types):
         return wrapper
     return decorator
 
-@operation('', 0)
+@operation('', 100)
 def op_noop():
     pass
 
