@@ -45,6 +45,7 @@ class MyApp(hildon.Program):
         self.w_input = input
         self.w_keypad = keypad
         self.stack = OpStack(self.w_stack)
+        self.opmode = False
 
         #self.window.set_app_menu(menu_bar)
         #self.window.add(label)
@@ -62,8 +63,17 @@ class MyApp(hildon.Program):
         if text:
             self.stack.push_op(text)
         self.w_input.set_text(op)
+        self.w_input.set_position(-1)
+        self.opmode = True
 
     def hit_digit(self, b):
+        if self.opmode:
+            self.opmode = False
+            text = self.w_input.get_text()
+            if text:
+                self.stack.push_op(text)
+                self.w_input.set_text('')
+
         self.w_input.insert_text(b.get_label(), -1)
         self.w_input.set_position(-1)
 
@@ -129,7 +139,7 @@ class MyApp(hildon.Program):
             buttons_box.attach(b, i+3, i+4, 4, 5)
 
         # Binary operations
-        for i, c in enumerate(('xor', 'and\nnot', 'and', 'not', 'or')):
+        for i, c in enumerate(('^', '&~', '&', '~', '|')):
             b = button(c, self.hit_opkey)
             buttons_box.attach(b, 6, 7, i, i+1)
 
