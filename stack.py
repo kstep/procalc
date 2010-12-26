@@ -75,7 +75,8 @@ class OpStack(object):
     def pop_op(self):
         data = self.pop()
         op = self.ops.get(data, None)
-        if not op:
-            return data
-        return op(self)
+        if op:
+            op(self)
+            data = self.pop()
+        return data
 
