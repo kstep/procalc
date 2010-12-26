@@ -1,6 +1,9 @@
 
 from operations import op_noop
 
+class StackError(Exception):
+    pass
+
 class OpStack(object):
     def __init__(self, buffer, *ops):
         self.buffer = buffer
@@ -13,6 +16,8 @@ class OpStack(object):
         start = self.buffer.get_iter_at_line(index)
         end = self.buffer.get_iter_at_line(index+1)
         text = self.buffer.get_text(start, end)
+        if not text:
+            raise StackError('Stack is empty')
         self.buffer.delete(start, end)
         return text.strip()
 
@@ -20,8 +25,11 @@ class OpStack(object):
         """
         Push value into stack
         """
+        data = str(data)
+        if not data:
+            raise StackError('No empty values allowed on the stack')
         iter = self.buffer.get_iter_at_line(index)
-        self.buffer.insert(iter, str(data) + '\n')
+        self.buffer.insert(iter, data + '\n')
 
     def get(self, index=0):
         """
@@ -36,10 +44,13 @@ class OpStack(object):
         """
         Put value into stack, stack doesn't grow
         """
+        data = str(data)
+        if not data:
+            raise StackError('No empty values allowed on the stack')
         start = self.buffer.get_iter_at_line(index)
         end = self.buffer.get_iter_at_line(index+1)
         self.buffer.delete(start, end)
-        self.buffer.insert(start, str(data)+'\n')
+        self.buffer.insert(start, data+'\n')
 
     def drop(self, index):
         """
