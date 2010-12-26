@@ -85,6 +85,15 @@ class MyApp(hildon.Program):
         self.w_input.insert_text(b.get_label(), -1)
         self.w_input.set_position(-1)
 
+    def hit_switch_sign(self, b):
+        if self.opmode:
+            return
+        text = self.w_input.get_text()
+        if text.startswith('-'):
+            self.w_input.set_text(text.lstrip('-'))
+        else:
+            self.w_input.set_text('-'+text)
+
     def hit_backspace(self, b):
         text = self.w_input.get_text()
         self.w_input.set_text(text[:-1])
@@ -130,9 +139,10 @@ class MyApp(hildon.Program):
             buttons_box.attach(b, x+3, x+4, y, y+1)
 
         # Other digital inputs
-        for i, c in enumerate(u',±'):
-            b = button(c)
-            buttons_box.attach(b, i+1, i+2, 4, 5)
+        b = button('.', self.hit_digit)
+        buttons_box.attach(b, 1, 2, 4, 5)
+        b = button('±', self.hit_switch_sign)
+        buttons_box.attach(b, 2, 3, 4, 5)
 
         # Basic operations
         for i, c in enumerate(u'↑÷×−+'):
