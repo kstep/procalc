@@ -31,7 +31,9 @@ class MyApp(hildon.Program):
         stack = hildon.TextView()
         input = hildon.Entry(gtk.HILDON_SIZE_AUTO)
 
+        input.set_placeholder('Empty value')
         input.set_properties(hildon_input_mode=gtk.HILDON_GTK_INPUT_MODE_ALPHA|gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL)
+        stack.set_placeholder('Stack is empty')
         stack.set_properties(width_request=300, editable=False)
 
         hbox = gtk.HBox()
