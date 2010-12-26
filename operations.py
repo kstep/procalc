@@ -1,11 +1,11 @@
-
+# coding: utf-8
 
 __all__ = ['op_noop', 'op_add', 'op_sub', 'op_mul', 'op_div', 'op_mod', 'op_pow']
 
-def operation(name, prio, argnum):
+def operation(name, prio, *types):
     def decorator(func):
         def wrapper(stack):
-            args = [stack.pop_op() for a in range(0, argnum)]
+            args = (t(stack.pop_op()) for t in types)
             result = func(*args)
             if result is None:
                 pass
@@ -19,31 +19,31 @@ def operation(name, prio, argnum):
         return wrapper
     return decorator
 
-@operation('', 0, 0)
+@operation('', 0)
 def op_noop():
     pass
 
-@operation('+', 1, 2)
+@operation('+', 1, int, int)
 def op_add(a, b):
     return a + b
 
-@operation('-', 1, 2)
+@operation('−', 1, int, int)
 def op_sub(a, b):
     return a - b
 
-@operation('*', 2, 2)
+@operation('×', 2, int, int)
 def op_mul(a, b):
     return a * b
 
-@operation('/', 2, 2)
+@operation('÷', 2, int, int)
 def op_div(a, b):
     return a / b
 
-@operation('%', 2, 2)
+@operation('%', 2, int, int)
 def op_mod(a, b):
     return a % b
 
-@operation('', 3, 2)
+@operation('↑', 3, int, int)
 def op_pow(a, b):
     return a ** b
 
