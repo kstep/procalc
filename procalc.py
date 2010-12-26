@@ -44,7 +44,7 @@ class MyApp(hildon.Program):
         self.w_stack = stack.get_buffer()
         self.w_input = input
         self.w_keypad = keypad
-        self.stack = OpStack(self.w_stack)
+        self.stack = OpStack(self.w_stack, *(getattr(operations, o) for o in operations.__all__))
         self.opmode = False
 
         #self.window.set_app_menu(menu_bar)
