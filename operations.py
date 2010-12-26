@@ -2,10 +2,17 @@
 
 __all__ = ['op_noop', 'op_add', 'op_sub', 'op_mul', 'op_div', 'op_mod', 'op_pow']
 
+class OperationError(ValueError):
+    pass
+
 def operation(name, prio, *types):
     def decorator(func):
         def wrapper(stack):
-            args = (t(stack.pop_op()) for t in types)
+            try:
+                args = (t(stack.pop_op()) for t in types)
+            except ValueError, e:
+                raise OperationError("Arguments type mismatch for %s%s" % (name, types))
+
             result = func(*args)
             if result is None:
                 pass
