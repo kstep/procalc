@@ -67,7 +67,7 @@ class OpStack(object):
             item = self.get(idx)
             if not item:
                 break
-            if self.ops.get(item, op_noop).op_prio <= pri:
+            if self.ops.get(item, op_noop).op_prio > pri:
                 break
             idx += 1
         self.push(op, idx)
