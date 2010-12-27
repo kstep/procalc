@@ -70,7 +70,11 @@ class MyApp(hildon.Program):
         self.w_input = input
         self.w_keypad = keypad
         self.stack = OpStack(stack.get_buffer(), *(getattr(operations, o) for o in operations.__all__))
+
         self.opmode = False
+        self.s_mode = False
+        self.s_func = False
+        self.s_fill = False
 
         menu_bar = self.create_menu()
         self.window.set_app_menu(menu_bar)
@@ -115,7 +119,15 @@ class MyApp(hildon.Program):
                 self.stack.push_op(text)
                 self.w_input.set_text('')
 
-        self.w_input.insert_text(b.get_label(), -1)
+        if self.s_mode:
+            bases = {'2': 'b', '8': 'o', '0': 'd', 'A': 'x'}
+            base = bases.get(b.get_label(), None)
+            if base:
+                self.w_input.insert_text(base, 0)
+            else:
+                self.message('Press 2, 8, 0 or A to select base', 2000)
+        else:
+            self.w_input.insert_text(b.get_label(), -1)
         self.w_input.set_position(-1)
 
     def hit_switch_sign(self, b):
@@ -156,6 +168,9 @@ class MyApp(hildon.Program):
 
     def hit_switch_base(self, b):
         self.message('Base is %s now' % b.get_label())
+
+    def hit_mode(self, b):
+        self.s_mode = not self.s_mode
 
     def message(self, text, timeout=500):
         banner = hildon.hildon_banner_show_information(self.window, '', text)
@@ -215,7 +230,7 @@ class MyApp(hildon.Program):
         buttons_box.attach(b, 7, 8, 3, 5)
 
         # Special mode keys
-        b = button('Mode', None, 'toggle')
+        b = button('Mode', self.hit_mode, 'toggle')
         buttons_box.attach(b, 3, 4, 0, 1)
         b = button('Fn', None, 'toggle')
         buttons_box.attach(b, 4, 5, 0, 1)
