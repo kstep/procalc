@@ -61,7 +61,7 @@ class ProCalcApp(hildon.Program):
         return menu
 
     def hit_execute(self, b):
-        text = self.w_input.get_text()
+        text = self.input
         if text:
             self.stack.push_op(text)
         try:
@@ -70,67 +70,61 @@ class ProCalcApp(hildon.Program):
             self.message(e.message, 2000)
             return
 
-        self.w_input.set_text(self.show_filter(dec(result)))
-        self.w_input.set_position(-1)
+        self.input = self.show_filter(dec(result))
 
     def hit_opkey(self, b):
         op = b.get_label()
-        text = self.w_input.get_text()
+        text = self.input
         if text:
             self.stack.push_op(text)
-        self.w_input.set_text(op)
-        self.w_input.set_position(-1)
+        self.input = op
         self.opmode = True
 
     def hit_digit(self, b):
         if self.opmode:
             self.opmode = False
-            text = self.w_input.get_text()
+            text = self.input
             if text:
                 self.stack.push_op(text)
-                self.w_input.set_text('')
+                self.input = ''
 
         if self.is_mode:
             bases = {'2': '0b', '8': '0', '0': '', 'A': '0x'}
             base = bases.get(b.get_label(), None)
             if base:
-                text = self.w_input.get_text()
+                text = self.input
                 minus = text.startswith('-')
                 text = base + text.lstrip('-0bx')
                 if minus:
                     text = '-' + text
-                self.w_input.set_text(text)
+                self.input = text
                 self.is_mode = False
             else:
                 self.message('Press 2, 8, 0 or A to select base', 2000)
         else:
-            self.w_input.insert_text(b.get_label(), -1)
-        self.w_input.set_position(-1)
+            self.add_input(b.get_label())
 
     def hit_switch_sign(self, b):
         if self.opmode:
             return
-        text = self.w_input.get_text()
+        text = self.input
         if text.startswith('-'):
-            self.w_input.set_text(text.lstrip('-'))
+            self.input = text.lstrip('-')
         else:
-            self.w_input.set_text('-'+text)
-        self.w_input.set_position(-1)
+            self.input = '-'+text
 
     def hit_backspace(self, b):
-        text = self.w_input.get_text()
-        self.w_input.set_text(text[:-1])
-        self.w_input.set_position(-1)
+        self.input = self.input[:-1]
 
     def hit_clear(self, b):
-        self.w_input.set_text('')
+        self.input = ''
         if self.is_func:
             self.stack.clear()
             self.is_func = False
 
     def hit_push_stack(self, b):
-        text = self.w_input.get_text()
-        self.w_input.set_text('')
+        text = self.input
+        self.input = ''
         try:
             self.stack.push(text)
         except StackError, e:
@@ -143,17 +137,15 @@ class ProCalcApp(hildon.Program):
             self.message(e.message)
             return
 
-        self.w_input.set_text(text)
-        self.w_input.set_position(-1)
+        self.input = text
 
     def hit_switch_base(self, b):
         base_name = b.get_label()
         self.show_filter = dict(Bin=bin, Oct=oct, Dec=str, Hex=hex).get(base_name, str)
         if not self.opmode:
-            text = self.w_input.get_text()
+            text = self.input
             if text:
-                self.w_input.set_text(self.show_filter(dec(text)))
-                self.w_input.set_position(-1)
+                self.input = self.show_filter(dec(text))
 
     def hit_mode(self, b):
         pass
@@ -175,6 +167,17 @@ class ProCalcApp(hildon.Program):
     def set_fill(self, value):
         return self.w_fill.set_active(value)
     is_fill = property(is_fill, set_fill)
+
+    def input(self):
+        return self.w_input.get_text()
+    def set_input(self, value):
+        self.w_input.set_text(str(value))
+        self.w_input.set_position(-1)
+    input = property(input, set_input)
+
+    def add_input(self, value):
+        self.w_input.insert_text(value, -1)
+        self.w_input.set_position(-1)
 
     def message(self, text, timeout=500):
         banner = hildon.hildon_banner_show_information(self.window, '', text)
