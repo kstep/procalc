@@ -8,23 +8,28 @@ import operations
 from operations import OperationError
 from stack import OpStack, StackError
 
-def button(label, onclicked=None):
-    button = hildon.GtkButton(gtk.HILDON_SIZE_FINGER_HEIGHT)
+def button(label, onclicked=None, button_type='normal', *args):
+    button_class = dict(
+            normal=hildon.GtkButton,
+            toggle=hildon.GtkToggleButton,
+            radio=hildon.GtkRadioButton,
+            check=hildon.CheckButton).get(button_type, hildon.GtkButton)
+    button = button_class(gtk.HILDON_SIZE_FINGER_HEIGHT, *args)
     button.set_label(str(label))
     if onclicked:
         button.connect('clicked', onclicked)
     return button
 
-def switch(menu, active=0, *labels):
-    button = None
+def switch(menu, active=0, onclicked=None, *labels):
+    b = None
     buttons = list()
     for l in labels:
-        button = hildon.GtkRadioButton(gtk.HILDON_SIZE_THUMB_HEIGHT, button)
-        button.set_label(l)
-        button.set_mode(False)
+        b = button(l, onclicked, 'radio', b)
+        b.set_label(l)
+        b.set_mode(False)
 
-        menu.add_filter(button)
-        buttons.append(button)
+        menu.add_filter(b)
+        buttons.append(b)
 
     buttons[active].set_active(True)
     return buttons
@@ -75,7 +80,7 @@ class MyApp(hildon.Program):
 
     def create_menu(self):
         menu = hildon.AppMenu()
-        switch(menu, 2, 'Bin', 'Oct', 'Dec', 'Hex')
+        switch(menu, 2, self.hit_switch_base, 'Bin', 'Oct', 'Dec', 'Hex')
         menu.show_all()
         return menu
 
@@ -148,6 +153,9 @@ class MyApp(hildon.Program):
         self.w_input.set_text(text)
         self.w_input.set_position(-1)
 
+    def hit_switch_base(self, b):
+        self.message('Base is %s now' % b.get_label())
+
     def message(self, text, timeout=500):
         banner = hildon.hildon_banner_show_information(self.window, '', text)
         banner.set_timeout(timeout)
@@ -198,7 +206,7 @@ class MyApp(hildon.Program):
             b = button(c, self.hit_opkey)
             buttons_box.attach(b, 7, 8, i, i+1)
 
-        b = button('Fill')
+        b = button('Fill', None, 'toggle')
         buttons_box.attach(b, 7, 8, 2, 3)
 
         # Execute
@@ -206,9 +214,9 @@ class MyApp(hildon.Program):
         buttons_box.attach(b, 7, 8, 3, 5)
 
         # Special mode keys
-        b = button('Mode')
+        b = button('Mode', None, 'toggle')
         buttons_box.attach(b, 3, 4, 0, 1)
-        b = button('Fn')
+        b = button('Fn', None, 'toggle')
         buttons_box.attach(b, 4, 5, 0, 1)
 
         # Edit keys
