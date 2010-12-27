@@ -23,7 +23,7 @@ def dec(s):
             base = 2
         else:
             base = 8
-        r = int(s.lstrip('0bx'), base)
+        r = int(s.lstrip('0bx') or '0', base)
     else:
         r = (float if '.' in s else int)(s)
 
