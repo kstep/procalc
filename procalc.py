@@ -9,7 +9,7 @@ from operations import OperationError
 from stack import OpStack, StackError
 
 def button(label, onclicked=None):
-    button = hildon.GtkButton(gtk.HILDON_SIZE_AUTO)
+    button = hildon.GtkButton(gtk.HILDON_SIZE_FINGER_HEIGHT)
     button.set_label(str(label))
     if onclicked:
         button.connect('clicked', onclicked)
@@ -156,6 +156,7 @@ class MyApp(hildon.Program):
     def create_keypad(self):
         buttons_box = gtk.Table(5, 8, homogeneous=True)
         buttons_box.set_row_spacings(4)
+        buttons_box.set_col_spacings(4)
 
         # Decimal digits
         for i in range(0, 9):
