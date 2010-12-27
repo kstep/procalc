@@ -29,20 +29,31 @@ class ProCalcApp(hildon.Program):
 
         panner = hildon.PannableArea()
         panner.add_with_viewport(stack)
-        panner.set_properties(mov_mode=hildon.MOVEMENT_MODE_VERT,
-                size_request_policy=hildon.SIZE_REQUEST_MINIMUM, width_request=200)
+        panner.set_properties(
+                mov_mode=hildon.MOVEMENT_MODE_VERT,
+                size_request_policy=hildon.SIZE_REQUEST_MINIMUM,
+                width_request=200,
+                height_request=100)
 
-        hbox = gtk.HBox()
-        hbox.pack_start(panner)
-        hbox.pack_end(keypad)
+        land_box = gtk.HBox()
+        land_box.pack_start(panner)
+        land_box.pack_end(keypad)
+
+        port_box = gtk.VBox()
+        port_box.set_properties(no_show_all=True)
 
         vbox = gtk.VBox()
         vbox.pack_start(input)
-        vbox.pack_end(hbox)
+        vbox.pack_end(land_box)
+        vbox.pack_end(port_box)
 
+        self.w_panner = panner
         self.w_stack = stack
         self.w_input = input
         self.w_keypad = keypad
+        self.w_portrait_box = port_box
+        self.w_landscape_box = land_box
+
         self.stack = OpStack(stack.get_buffer(), *(getattr(operations, o) for o in operations.__all__))
         self.opmode = False
         self.show_filter = str
@@ -57,8 +68,29 @@ class ProCalcApp(hildon.Program):
     def create_menu(self):
         menu = hildon.AppMenu()
         switch(menu, 2, self.hit_switch_base, 'Bin', 'Oct', 'Dec', 'Hex')
+        b = button('Portrait', self.hit_switch_portrait, 'toggle')
+        menu.append(b)
         menu.show_all()
         return menu
+
+    def hit_switch_portrait(self, b):
+        flags = 0
+        if b.get_active():
+            flags = hildon.PORTRAIT_MODE_SUPPORT | \
+                    hildon.PORTRAIT_MODE_REQUEST
+            new_parent = self.w_portrait_box
+            old_parent = self.w_landscape_box
+        else:
+            old_parent = self.w_portrait_box
+            new_parent = self.w_landscape_box
+
+        self.w_panner.reparent(new_parent)
+        self.w_keypad.reparent(new_parent)
+
+        old_parent.hide()
+        new_parent.show()
+
+        hildon.hildon_gtk_window_set_portrait_flags(self.window, flags)
 
     def hit_execute(self, b):
         text = self.input
