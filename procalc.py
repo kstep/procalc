@@ -15,6 +15,20 @@ def button(label, onclicked=None):
         button.connect('clicked', onclicked)
     return button
 
+def switch(menu, active=0, *labels):
+    button = None
+    buttons = list()
+    for l in labels:
+        button = hildon.GtkRadioButton(gtk.HILDON_SIZE_THUMB_HEIGHT, button)
+        button.set_label(l)
+        button.set_mode(False)
+
+        menu.add_filter(button)
+        buttons.append(button)
+
+    buttons[active].set_active(True)
+    return buttons
+
 class MyApp(hildon.Program):
 
     def __init__(self):
@@ -23,9 +37,6 @@ class MyApp(hildon.Program):
         self.window = hildon.Window()
         self.window.connect("delete_event", self.quit)
         self.add_window(self.window)
-
-        #menu_bar = self.create_menu()
-        #label = gtk.Label('Hello, world!')
 
         keypad = self.create_keypad()
         stack = hildon.TextView()
@@ -55,15 +66,18 @@ class MyApp(hildon.Program):
         self.stack = OpStack(stack.get_buffer(), *(getattr(operations, o) for o in operations.__all__))
         self.opmode = False
 
-        #self.window.set_app_menu(menu_bar)
-        #self.window.add(label)
+        menu_bar = self.create_menu()
+        self.window.set_app_menu(menu_bar)
         self.window.add(vbox)
 
     def quit(self, *args):
         gtk.main_quit()
 
     def create_menu(self):
-        pass
+        menu = hildon.AppMenu()
+        switch(menu, 2, 'Bin', 'Oct', 'Dec', 'Hex')
+        menu.show_all()
+        return menu
 
     def hit_execute(self, b):
         text = self.w_input.get_text()
