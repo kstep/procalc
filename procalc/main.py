@@ -208,7 +208,7 @@ class ProCalcApp(hildon.Program):
 
         # Basic operations
         for i, c in enumerate(u'↑÷×−+'):
-            b = button(c, self.hit_opkey)
+            b = button(str(c), self.hit_opkey)
             buttons_box.attach(b, 5, 6, i, i+1)
 
         # Stack operations
