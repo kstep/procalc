@@ -34,10 +34,15 @@ class MyApp(hildon.Program):
         input.set_placeholder('Empty value')
         input.set_properties(hildon_input_mode=gtk.HILDON_GTK_INPUT_MODE_ALPHA|gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL)
         stack.set_placeholder('Stack is empty')
-        stack.set_properties(width_request=300, editable=False)
+        stack.set_properties(editable=False)
+
+        panner = hildon.PannableArea()
+        panner.add_with_viewport(stack)
+        panner.set_properties(mov_mode=hildon.MOVEMENT_MODE_VERT,
+                size_request_policy=hildon.SIZE_REQUEST_MINIMUM, width_request=300)
 
         hbox = gtk.HBox()
-        hbox.pack_start(stack)
+        hbox.pack_start(panner)
         hbox.pack_end(keypad)
 
         vbox = gtk.VBox()
