@@ -70,11 +70,7 @@ class MyApp(hildon.Program):
         self.w_input = input
         self.w_keypad = keypad
         self.stack = OpStack(stack.get_buffer(), *(getattr(operations, o) for o in operations.__all__))
-
         self.opmode = False
-        self.s_mode = False
-        self.s_func = False
-        self.s_fill = False
 
         menu_bar = self.create_menu()
         self.window.set_app_menu(menu_bar)
@@ -119,7 +115,7 @@ class MyApp(hildon.Program):
                 self.stack.push_op(text)
                 self.w_input.set_text('')
 
-        if self.s_mode:
+        if self.is_mode:
             bases = {'2': 'b', '8': 'o', '0': 'd', 'A': 'x'}
             base = bases.get(b.get_label(), None)
             if base:
@@ -170,7 +166,19 @@ class MyApp(hildon.Program):
         self.message('Base is %s now' % b.get_label())
 
     def hit_mode(self, b):
-        self.s_mode = not self.s_mode
+        pass
+
+    @property
+    def is_mode(self):
+        return self.w_mode.get_active()
+
+    @property
+    def is_func(self):
+        return self.w_func.get_active()
+
+    @property
+    def is_fill(self):
+        return self.w_fill.get_active()
 
     def message(self, text, timeout=500):
         banner = hildon.hildon_banner_show_information(self.window, '', text)
@@ -222,18 +230,22 @@ class MyApp(hildon.Program):
             b = button(c, self.hit_opkey)
             buttons_box.attach(b, 7, 8, i, i+1)
 
-        b = button('Fill', None, 'toggle')
-        buttons_box.attach(b, 7, 8, 2, 3)
-
         # Execute
         b = button('=', self.hit_execute)
         buttons_box.attach(b, 7, 8, 3, 5)
 
         # Special mode keys
         b = button('Mode', self.hit_mode, 'toggle')
+        self.w_mode = b
         buttons_box.attach(b, 3, 4, 0, 1)
+
         b = button('Fn', None, 'toggle')
+        self.w_func = b
         buttons_box.attach(b, 4, 5, 0, 1)
+
+        b = button('Fill', None, 'toggle')
+        self.w_fill = b
+        buttons_box.attach(b, 7, 8, 2, 3)
 
         # Edit keys
         b = button('C', self.hit_clear)
