@@ -70,7 +70,7 @@ class ProCalcApp(hildon.Program):
             self.message(e.message, 2000)
             return
 
-        self.w_input.set_text(self.show_filter(result))
+        self.w_input.set_text(self.show_filter(dec(result)))
         self.w_input.set_position(-1)
 
     def hit_opkey(self, b):
