@@ -4,4 +4,5 @@ Version=0.1
 Type=Application
 Name=ProCalc
 Exec=/usr/bin/procalc
+Icon=procalc
 X-Osso-Type=application/x-executable
