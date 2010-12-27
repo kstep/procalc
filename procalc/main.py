@@ -128,7 +128,7 @@ class ProCalcApp(hildon.Program):
         if self.is_mode:
             bases = {'2': '0b', '8': '0', '0': '', 'A': '0x'}
             base = bases.get(b.get_label(), None)
-            if base:
+            if base is not None:
                 text = self.input
                 minus = text.startswith('-')
                 text = base + text.lstrip('-0bx')
