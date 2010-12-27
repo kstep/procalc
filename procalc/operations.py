@@ -1,6 +1,6 @@
 # coding: utf-8
 
-__all__ = ['op_noop', 'op_add', 'op_sub', 'op_mul', 'op_div', 'op_mod', 'op_pow', 'op_or', 'op_xor', 'op_and', 'op_andnot', 'op_not', 'op_shl', 'op_shr']
+__all__ = ['op_noop', 'op_oper', 'op_add', 'op_sub', 'op_mul', 'op_div', 'op_mod', 'op_pow', 'op_or', 'op_xor', 'op_and', 'op_andnot', 'op_not', 'op_shl', 'op_shr']
 
 from procalc.util import dec
 
@@ -28,8 +28,12 @@ def operation(name, prio, *types):
         return wrapper
     return decorator
 
-@operation('', 100)
+@operation('', 0)
 def op_noop():
+    pass
+
+@operation('', 100)
+def op_oper():
     pass
 
 @operation('+', 1, dec, dec)
