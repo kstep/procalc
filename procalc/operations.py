@@ -2,6 +2,8 @@
 
 __all__ = ['op_noop', 'op_add', 'op_sub', 'op_mul', 'op_div', 'op_mod', 'op_pow', 'op_or', 'op_xor', 'op_and', 'op_andnot', 'op_not', 'op_shl', 'op_shr']
 
+from procalc.util import dec
+
 class OperationError(ValueError):
     pass
 
@@ -30,55 +32,55 @@ def operation(name, prio, *types):
 def op_noop():
     pass
 
-@operation('+', 1, int, int)
+@operation('+', 1, dec, dec)
 def op_add(a, b):
     return a + b
 
-@operation('−', 1, int, int)
+@operation('−', 1, dec, dec)
 def op_sub(a, b):
     return a - b
 
-@operation('×', 2, int, int)
+@operation('×', 2, dec, dec)
 def op_mul(a, b):
     return a * b
 
-@operation('÷', 2, int, int)
+@operation('÷', 2, dec, dec)
 def op_div(a, b):
     return a / b
 
-@operation('%', 2, int, int)
+@operation('%', 2, dec, dec)
 def op_mod(a, b):
     return a % b
 
-@operation('↑', 3, int, int)
+@operation('↑', 3, dec, dec)
 def op_pow(a, b):
     return a ** b
 
-@operation('^', 2, int, int)
+@operation('^', 2, dec, dec)
 def op_xor(a, b):
     return a ^ b
 
-@operation('|', 2, int, int)
+@operation('|', 2, dec, dec)
 def op_or(a, b):
     return a | b
 
-@operation('&', 2, int, int)
+@operation('&', 2, dec, dec)
 def op_and(a, b):
     return a & b
 
-@operation('~', 4, int)
+@operation('~', 4, dec)
 def op_not(a):
     return ~a
 
-@operation('&~', 2, int, int)
+@operation('&~', 2, dec, dec)
 def op_andnot(a, b):
     return a & ~b
 
-@operation('>>', 2, int, int)
+@operation('>>', 2, dec, dec)
 def op_shr(a, b):
     return a >> b
 
-@operation('<<', 2, int, int)
+@operation('<<', 2, dec, dec)
 def op_shl(a, b):
     return a << b
 
