@@ -4,9 +4,9 @@
 import gtk
 import hildon
 
-import operations
-from operations import OperationError
-from stack import OpStack, StackError
+from procalc import operations
+from procalc.operations import OperationError
+from procalc.stack import OpStack, StackError
 
 def button(label, onclicked=None, button_type='normal', *args):
     button_class = dict(

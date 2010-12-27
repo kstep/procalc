@@ -1,5 +1,5 @@
 
-from operations import op_noop
+from procalc.operations import op_noop
 
 class StackError(Exception):
     pass
