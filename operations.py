@@ -1,6 +1,6 @@
 # coding: utf-8
 
-__all__ = ['op_noop', 'op_add', 'op_sub', 'op_mul', 'op_div', 'op_mod', 'op_pow']
+__all__ = ['op_noop', 'op_add', 'op_sub', 'op_mul', 'op_div', 'op_mod', 'op_pow', 'op_or', 'op_xor', 'op_and', 'op_andnot', 'op_not', 'op_shl', 'op_shr']
 
 class OperationError(ValueError):
     pass
@@ -53,4 +53,32 @@ def op_mod(a, b):
 @operation('↑', 3, int, int)
 def op_pow(a, b):
     return a ** b
+
+@operation('^', 2, int, int)
+def op_xor(a, b):
+    return a ^ b
+
+@operation('|', 2, int, int)
+def op_or(a, b):
+    return a | b
+
+@operation('&', 2, int, int)
+def op_and(a, b):
+    return a & b
+
+@operation('~', 4, int)
+def op_not(a):
+    return ~a
+
+@operation('&~', 2, int, int)
+def op_andnot(a, b):
+    return a & ~b
+
+@operation('>>', 2, int, int)
+def op_shr(a, b):
+    return a >> b
+
+@operation('<<', 2, int, int)
+def op_shl(a, b):
+    return a << b
 
