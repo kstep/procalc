@@ -6,7 +6,7 @@ import hildon
 from procalc import operations
 from procalc.operations import OperationError
 from procalc.stack import OpStack, StackError
-from procalc.util import button, switch
+from procalc.util import button, switch, bin, dec
 
 class ProCalcApp(hildon.Program):
 
@@ -45,6 +45,7 @@ class ProCalcApp(hildon.Program):
         self.w_keypad = keypad
         self.stack = OpStack(stack.get_buffer(), *(getattr(operations, o) for o in operations.__all__))
         self.opmode = False
+        self.show_filter = str
 
         menu_bar = self.create_menu()
         self.window.set_app_menu(menu_bar)
@@ -69,7 +70,7 @@ class ProCalcApp(hildon.Program):
             self.message(e.message, 2000)
             return
 
-        self.w_input.set_text(str(result))
+        self.w_input.set_text(self.show_filter(dec(result)))
         self.w_input.set_position(-1)
 
     def hit_opkey(self, b):
@@ -146,7 +147,14 @@ class ProCalcApp(hildon.Program):
         self.w_input.set_position(-1)
 
     def hit_switch_base(self, b):
-        self.message('Base is %s now' % b.get_label())
+        base_name = b.get_label()
+        self.message('Base is %s now' % base_name)
+        self.show_filter = dict(Bin=bin, Oct=oct, Dec=str, Hex=hex).get(base_name, str)
+        if not self.opmode:
+            text = self.w_input.get_text()
+            if text:
+                self.w_input.set_text(self.show_filter(dec(text)))
+                self.w_input.set_position(-1)
 
     def hit_mode(self, b):
         pass
