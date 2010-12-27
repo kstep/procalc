@@ -11,6 +11,9 @@ def bin(x):
     return '0b' + (r or '0')
 
 def dec(s):
+    minus = s.startswith('-')
+    s = s.lstrip('-')
+
     if s.startswith('0'):
         if s.startswith('0x'):
             base = 16
@@ -18,10 +21,11 @@ def dec(s):
             base = 2
         else:
             base = 8
-        s = s.lstrip('0bx')
+        r = int(s.lstrip('0bx'), base)
     else:
-        base = 10
-    return int(s, base)
+        r = (float if '.' in s else int)(s)
+
+    return -r if minus else r
 
 def button(label, onclicked=None, button_type='normal', *args):
     button_class = dict(
