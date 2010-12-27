@@ -148,7 +148,6 @@ class ProCalcApp(hildon.Program):
 
     def hit_switch_base(self, b):
         base_name = b.get_label()
-        self.message('Base is %s now' % base_name)
         self.show_filter = dict(Bin=bin, Oct=oct, Dec=str, Hex=hex).get(base_name, str)
         if not self.opmode:
             text = self.w_input.get_text()
