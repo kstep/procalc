@@ -1,5 +1,5 @@
 
-from procalc.operations import op_noop
+from procalc.operations import op_noop, op_oper
 
 class StackError(Exception):
     pass
@@ -74,15 +74,27 @@ class OpStack(object):
     def push_op(self, op):
         fop = self.ops.get(op, op_noop)
         pri = fop.op_prio
+
         idx = 0
         while True:
             item = self.get(idx)
             if not item:
                 break
-            iop = self.ops.get(item, op_noop)
-            if iop.op_prio >= pri and iop is not fop:
+
+            iop = self.ops.get(item, op_oper)
+            if fop is op_noop:
+                if iop.op_prio <= pri:
+                    break
+                pri = iop.op_prio
+
+            elif iop.op_prio >= pri:
                 break
+
             idx += 1
+
+        if pri == op_oper.op_prio:
+            idx -= 1
+
         self.push(op, idx)
 
     def pop_op(self):
