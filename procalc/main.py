@@ -14,7 +14,7 @@ class ProCalcApp(hildon.Program):
         super(ProCalcApp, self).__init__()
 
         self.window = hildon.Window()
-        self.window.set_title("Programmer's Calculator")
+        self.window.set_title("ProCalc")
         self.window.connect("delete_event", self.quit)
         self.add_window(self.window)
 
