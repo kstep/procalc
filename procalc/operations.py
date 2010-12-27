@@ -14,7 +14,7 @@ def operation(name, prio, *types):
                 args = (t(stack.pop_op()) for t in types)
                 result = func(*args)
             except ValueError, e:
-                raise OperationError("Arguments type mismatch for %s%s" % (name, types))
+                raise OperationError("Arguments type mismatch for %s(%s)" % (name, ", ".join(map(lambda t: t.__name__, types))))
 
             if result is None:
                 pass
