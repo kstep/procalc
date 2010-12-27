@@ -162,12 +162,6 @@ class ProCalcApp(hildon.Program):
         return self.w_func.set_active(value)
     is_func = property(is_func, set_func)
 
-    def is_fill(self):
-        return self.w_fill.get_active()
-    def set_fill(self, value):
-        return self.w_fill.set_active(value)
-    is_fill = property(is_fill, set_fill)
-
     def input(self):
         return self.w_input.get_text()
     def set_input(self, value):
@@ -242,8 +236,7 @@ class ProCalcApp(hildon.Program):
         self.w_func = b
         buttons_box.attach(b, 4, 5, 0, 1)
 
-        b = button('Fill', None, 'toggle')
-        self.w_fill = b
+        b = button('×Bⁿ')
         buttons_box.attach(b, 7, 8, 2, 3)
 
         # Edit keys
