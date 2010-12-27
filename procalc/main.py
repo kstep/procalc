@@ -6,7 +6,7 @@ import hildon
 from procalc import operations
 from procalc.operations import OperationError
 from procalc.stack import OpStack, StackError
-from procalc.util import button, switch, bin, dec
+from procalc.util import button, switch, bin, dec, transpose_table
 
 class ProCalcApp(hildon.Program):
 
@@ -33,19 +33,22 @@ class ProCalcApp(hildon.Program):
                 mov_mode=hildon.MOVEMENT_MODE_VERT,
                 size_request_policy=hildon.SIZE_REQUEST_MINIMUM,
                 width_request=200,
-                height_request=100)
+                height_request=110)
 
         land_box = gtk.HBox()
+        land_box.set_spacing(4)
         land_box.pack_start(panner)
-        land_box.pack_end(keypad)
+        land_box.pack_end(keypad[1])
+        land_box.pack_end(keypad[0])
 
         port_box = gtk.VBox()
+        port_box.set_spacing(4)
         port_box.set_properties(no_show_all=True)
 
         vbox = gtk.VBox()
         vbox.pack_start(input)
-        vbox.pack_end(land_box)
-        vbox.pack_end(port_box)
+        vbox.pack_start(land_box)
+        vbox.pack_start(port_box)
 
         self.w_panner = panner
         self.w_stack = stack
@@ -84,13 +87,15 @@ class ProCalcApp(hildon.Program):
             old_parent = self.w_portrait_box
             new_parent = self.w_landscape_box
 
+        hildon.hildon_gtk_window_set_portrait_flags(self.window, flags)
+
         self.w_panner.reparent(new_parent)
-        self.w_keypad.reparent(new_parent)
+        self.w_keypad[0].reparent(new_parent)
+        self.w_keypad[1].reparent(new_parent)
+        transpose_table(self.w_keypad[1])
 
         old_parent.hide()
         new_parent.show()
-
-        hildon.hildon_gtk_window_set_portrait_flags(self.window, flags)
 
     def hit_execute(self, b):
         text = self.input
@@ -211,73 +216,77 @@ class ProCalcApp(hildon.Program):
         return banner
 
     def create_keypad(self):
-        buttons_box = gtk.Table(5, 8, homogeneous=True)
-        buttons_box.set_row_spacings(4)
-        buttons_box.set_col_spacings(4)
+        buttons_box1 = gtk.Table(5, 5, homogeneous=True)
+        buttons_box1.set_row_spacings(4)
+        buttons_box1.set_col_spacings(4)
+
+        buttons_box2 = gtk.Table(5, 3, homogeneous=True)
+        buttons_box2.set_row_spacings(4)
+        buttons_box2.set_col_spacings(4)
 
         # Decimal digits
         for i in range(0, 9):
             x, y = i % 3, 3 - (i / 3)
             b = button(i+1, self.hit_digit)
-            buttons_box.attach(b, x, x+1, y, y+1)
+            buttons_box1.attach(b, x, x+1, y, y+1)
         b = button(0, self.hit_digit)
-        buttons_box.attach(b, 0, 1, 4, 5)
+        buttons_box1.attach(b, 0, 1, 4, 5)
 
         # Hex digits
         for i in range(0, 6):
             x, y = i % 2, 3 - (i / 2)
             b = button(chr(i+65), self.hit_digit)
-            buttons_box.attach(b, x+3, x+4, y, y+1)
+            buttons_box1.attach(b, x+3, x+4, y, y+1)
 
         # Other digital inputs
         b = button('.', self.hit_digit)
-        buttons_box.attach(b, 1, 2, 4, 5)
+        buttons_box1.attach(b, 1, 2, 4, 5)
         b = button('±', self.hit_switch_sign)
-        buttons_box.attach(b, 2, 3, 4, 5)
+        buttons_box1.attach(b, 2, 3, 4, 5)
 
         # Basic operations
         for i, c in enumerate(u'↑÷×−+'):
             b = button(str(c), self.hit_opkey)
-            buttons_box.attach(b, 5, 6, i, i+1)
+            buttons_box2.attach(b, 0, 1, i, i+1)
 
         # Stack operations
         hooks = [self.hit_push_stack, self.hit_pop_stack]
         for i, c in enumerate((u'st↓', u'st↑')):
             b = button(c, hooks[i])
-            buttons_box.attach(b, i+3, i+4, 4, 5)
+            buttons_box1.attach(b, i+3, i+4, 4, 5)
 
         # Binary operations
         for i, c in enumerate(('^', '&~', '&', '~', '|')):
             b = button(c, self.hit_opkey)
-            buttons_box.attach(b, 6, 7, i, i+1)
+            buttons_box2.attach(b, 1, 2, i, i+1)
 
         for i, c in enumerate(('<<', '>>')):
             b = button(c, self.hit_opkey)
-            buttons_box.attach(b, 7, 8, i, i+1)
+            buttons_box2.attach(b, 2, 3, i, i+1)
 
         # Execute
         b = button('=', self.hit_execute)
-        buttons_box.attach(b, 7, 8, 3, 5)
+        buttons_box2.attach(b, 2, 3, 3, 5)
 
         # Special mode keys
         b = button('Mod', self.hit_mode, 'toggle')
         self.w_mode = b
-        buttons_box.attach(b, 3, 4, 0, 1)
+        buttons_box1.attach(b, 3, 4, 0, 1)
 
         b = button('Fn', None, 'toggle')
         self.w_func = b
-        buttons_box.attach(b, 4, 5, 0, 1)
+        buttons_box1.attach(b, 4, 5, 0, 1)
 
         b = button('×Bⁿ')
-        buttons_box.attach(b, 7, 8, 2, 3)
+        buttons_box2.attach(b, 2, 3, 2, 3)
 
         # Edit keys
         b = button('C', self.hit_clear)
-        buttons_box.attach(b, 0, 1, 0, 1)
+        buttons_box1.attach(b, 0, 1, 0, 1)
         b = button(u'←', self.hit_backspace)
-        buttons_box.attach(b, 1, 3, 0, 1)
+        buttons_box1.attach(b, 1, 3, 0, 1)
 
-        return buttons_box
+        return buttons_box1, buttons_box2
 
     def run(self):
         self.window.show_all()

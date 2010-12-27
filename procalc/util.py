@@ -3,6 +3,23 @@
 import gtk
 import hildon
 
+def transpose_table(table):
+    cols = table.get_property('n-columns')
+    rows = table.get_property('n-rows')
+
+    children = table.get_children()
+    for c in children:
+        x1 = table.child_get_property(c, 'left-attach')
+        x2 = table.child_get_property(c, 'right-attach')
+        y1 = table.child_get_property(c, 'top-attach')
+        y2 = table.child_get_property(c, 'bottom-attach')
+        table.child_set_property(c, 'left-attach', y1)
+        table.child_set_property(c, 'right-attach', y2)
+        table.child_set_property(c, 'top-attach', x1)
+        table.child_set_property(c, 'bottom-attach', x2)
+
+    table.resize(cols, rows)
+
 def bin(x):
     r = ''
     a = abs(x)
