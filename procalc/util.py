@@ -3,6 +3,26 @@
 import gtk
 import hildon
 
+def bin(x):
+    r = ''
+    while x:
+        r = str(x & 1) + r
+        x = x >> 1
+    return '0b' + (r or '0')
+
+def dec(s):
+    if s.startswith('0'):
+        if s.startswith('0x'):
+            base = 16
+        elif s.startswith('0b'):
+            base = 2
+        else:
+            base = 8
+        s = s.lstrip('0bx')
+    else:
+        base = 10
+    return int(s, base)
+
 def button(label, onclicked=None, button_type='normal', *args):
     button_class = dict(
             normal=hildon.GtkButton,
