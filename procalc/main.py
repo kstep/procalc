@@ -30,7 +30,7 @@ class ProCalcApp(hildon.Program):
         panner = hildon.PannableArea()
         panner.add_with_viewport(stack)
         panner.set_properties(mov_mode=hildon.MOVEMENT_MODE_VERT,
-                size_request_policy=hildon.SIZE_REQUEST_MINIMUM, width_request=300)
+                size_request_policy=hildon.SIZE_REQUEST_MINIMUM, width_request=200)
 
         hbox = gtk.HBox()
         hbox.pack_start(panner)
@@ -228,7 +228,7 @@ class ProCalcApp(hildon.Program):
         buttons_box.attach(b, 7, 8, 3, 5)
 
         # Special mode keys
-        b = button('Mode', self.hit_mode, 'toggle')
+        b = button('Mod', self.hit_mode, 'toggle')
         self.w_mode = b
         buttons_box.attach(b, 3, 4, 0, 1)
 
