@@ -11,7 +11,8 @@ def operation(name, prio, *types):
     def decorator(func):
         def wrapper(stack):
             try:
-                args = (t(stack.pop_op()) for t in types)
+                args = [t(stack.pop_op()) for t in reversed(types)]
+                args.reverse()
                 result = func(*args)
             except ValueError, e:
                 raise OperationError("Arguments type mismatch for %s(%s)" % (name, ", ".join(map(lambda t: t.__name__, types))))
@@ -19,7 +20,7 @@ def operation(name, prio, *types):
             if result is None:
                 pass
             elif isinstance(result, tuple):
-                for r in result:
+                for r in reversed(result):
                     stack.push(r)
             else:
                 stack.push(result)
