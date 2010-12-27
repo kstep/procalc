@@ -143,6 +143,8 @@ class MyApp(hildon.Program):
 
     def hit_clear(self, b):
         self.w_input.set_text('')
+        if self.is_func:
+            self.stack.clear()
 
     def hit_push_stack(self, b):
         text = self.w_input.get_text()
@@ -168,17 +170,23 @@ class MyApp(hildon.Program):
     def hit_mode(self, b):
         pass
 
-    @property
     def is_mode(self):
         return self.w_mode.get_active()
+    def set_mode(self, value):
+        return self.w_mode.set_active(value)
+    is_mode = property(is_mode, set_mode)
 
-    @property
     def is_func(self):
         return self.w_func.get_active()
+    def set_func(self, value):
+        return self.w_func.set_active(value)
+    is_func = property(is_func, set_func)
 
-    @property
     def is_fill(self):
         return self.w_fill.get_active()
+    def set_fill(self, value):
+        return self.w_fill.set_active(value)
+    is_fill = property(is_fill, set_fill)
 
     def message(self, text, timeout=500):
         banner = hildon.hildon_banner_show_information(self.window, '', text)
