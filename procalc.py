@@ -106,6 +106,7 @@ class MyApp(hildon.Program):
             self.w_input.set_text(text.lstrip('-'))
         else:
             self.w_input.set_text('-'+text)
+        self.w_input.set_position(-1)
 
     def hit_backspace(self, b):
         text = self.w_input.get_text()
