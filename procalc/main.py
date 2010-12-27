@@ -90,10 +90,15 @@ class ProCalcApp(hildon.Program):
                 self.w_input.set_text('')
 
         if self.is_mode:
-            bases = {'2': 'b', '8': 'o', '0': 'd', 'A': 'x'}
+            bases = {'2': '0b', '8': '0', '0': '', 'A': '0x'}
             base = bases.get(b.get_label(), None)
             if base:
-                self.w_input.insert_text(base, 0)
+                text = self.w_input.get_text()
+                minus = text.startswith('-')
+                text = base + text.lstrip('-0bx')
+                if minus:
+                    text = '-' + text
+                self.w_input.set_text(text)
                 self.is_mode = False
             else:
                 self.message('Press 2, 8, 0 or A to select base', 2000)
