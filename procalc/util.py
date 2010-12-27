@@ -13,6 +13,8 @@ def bin(x):
 def dec(s):
     minus = s.startswith('-')
     s = s.lstrip('-')
+    if not s:
+        return 0
 
     if s.startswith('0'):
         if s.startswith('0x'):
