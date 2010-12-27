@@ -49,10 +49,10 @@ class MyApp(hildon.Program):
         vbox.pack_start(input)
         vbox.pack_end(hbox)
 
-        self.w_stack = stack.get_buffer()
+        self.w_stack = stack
         self.w_input = input
         self.w_keypad = keypad
-        self.stack = OpStack(self.w_stack, *(getattr(operations, o) for o in operations.__all__))
+        self.stack = OpStack(stack.get_buffer(), *(getattr(operations, o) for o in operations.__all__))
         self.opmode = False
 
         #self.window.set_app_menu(menu_bar)
