@@ -5,29 +5,32 @@ import hildon
 
 def bin(x):
     r = ''
-    while x:
-        r = str(x & 1) + r
-        x = x >> 1
-    return '0b' + (r or '0')
+    a = abs(x)
+    while a:
+        r = str(a & 1) + r
+        a = a >> 1
+    r = '0b' + (r or '0')
+    if x < 0:
+        r = '-' + r
+    return r
 
 def dec(s):
-    minus = s.startswith('-')
-    s = s.lstrip('-')
-    if not s:
+    x = s.lstrip('-')
+    if not x:
         return 0
 
-    if s.startswith('0'):
-        if s.startswith('0x'):
+    if x.startswith('0'):
+        if x.startswith('0x'):
             base = 16
-        elif s.startswith('0b'):
+        elif x.startswith('0b'):
             base = 2
         else:
             base = 8
-        r = int(s.lstrip('0bx') or '0', base)
+        r = int(x.lstrip('0bx') or '0', base)
     else:
-        r = (float if '.' in s else int)(s)
+        r = (float if '.' in x else int)(x)
 
-    return -r if minus else r
+    return -r if s.startswith('-') else r
 
 def button(label, onclicked=None, button_type='normal', *args):
     button_class = dict(
