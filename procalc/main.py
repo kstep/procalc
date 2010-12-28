@@ -6,7 +6,7 @@ import hildon
 from procalc import operations
 from procalc.operations import OperationError
 from procalc.stack import OpStack, StackError
-from procalc.util import button, picker, switch, bin, dec, transpose_table
+from procalc.util import button, switch, bin, dec, transpose_table
 
 class ProCalcApp(hildon.Program):
 
@@ -100,9 +100,22 @@ class ProCalcApp(hildon.Program):
     def create_menu(self):
         menu = hildon.AppMenu()
         switch(menu, 2, self.hit_switch_base, 'Bin', 'Oct', 'Dec', 'Hex')
-        menu.append(button('Portrait', self.hit_switch_portrait, 'toggle'))
+
+        nums = gtk.ListStore(str)
+        for i in range(0, 11):
+            nums.append((str(i),))
+
+        selector = hildon.TouchSelector()
+        selector.append_text_column(nums, True)
+        selector.append_text_column(nums, True)
+
+        b = hildon.PickerButton(gtk.HILDON_SIZE_THUMB_HEIGHT, hildon.BUTTON_ARRANGEMENT_HORIZONTAL)
+        b.set_title('Precision')
+        b.set_selector(selector)
+        menu.append(b)
+
         menu.append(button('Unsigned', None, 'toggle'))
-        menu.append(picker('Precision', None, *range(0, 11)))
+        menu.append(button('Portrait', self.hit_switch_portrait, 'toggle'))
         menu.append(button('About'))
         menu.show_all()
         return menu
