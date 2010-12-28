@@ -16,6 +16,7 @@ class ProCalcApp(hildon.Program):
         self.window = hildon.Window()
         self.window.set_title("ProCalc")
         self.window.connect("delete_event", self.quit)
+        self.window.connect("key-press-event", self.hit_keyboard)
         self.add_window(self.window)
 
         keypad = self.create_keypad()
@@ -98,32 +99,20 @@ class ProCalcApp(hildon.Program):
         new_parent.show()
 
     def hit_execute(self, b):
-        text = self.input
-        if text:
-            self.stack.push_op(text)
-        try:
-            result = self.stack.pop_op()
-        except (StackError, OperationError), e:
-            self.message(e.message, 2000)
-            return
-
-        self.input = self.show_filter(dec(result))
+        self.stack_push_op()
+        self.stack_pop_op()
+        self.input = self.show_filter(dec(self.input))
 
     def hit_opkey(self, b):
         op = b.get_label()
-        text = self.input
-        if text:
-            self.stack.push_op(text)
+        self.stack_push_op()
         self.input = op
         self.opmode = True
 
     def hit_digit(self, b):
         if self.opmode:
             self.opmode = False
-            text = self.input
-            if text:
-                self.stack.push_op(text)
-                self.input = ''
+            self.stack_push_op()
 
         if self.is_mode:
             bases = {'2': '0b', '8': '0', '0': '', 'A': '0x'}
@@ -160,21 +149,10 @@ class ProCalcApp(hildon.Program):
             self.is_func = False
 
     def hit_push_stack(self, b):
-        text = self.input
-        self.input = ''
-        try:
-            self.stack.push(text)
-        except StackError, e:
-            self.message(e.message)
+        self.stack_push()
 
     def hit_pop_stack(self, b):
-        try:
-            text = self.stack.pop()
-        except StackError, e:
-            self.message(e.message)
-            return
-
-        self.input = text
+        self.stack_pop()
 
     def hit_switch_base(self, b):
         base_name = b.get_label()
@@ -186,6 +164,83 @@ class ProCalcApp(hildon.Program):
 
     def hit_mode(self, b):
         pass
+
+    def hit_keyboard(self, w, ev):
+        def switch_key(attr):
+            def w():
+                setattr(self, attr, not getattr(self, attr))
+            return w
+
+        def ins_key(ch):
+            def w():
+                if self.opmode:
+                    self.stack_push_op()
+                    self.opmode = False
+                self.ins_input(ch)
+            return w
+
+        def op_key(ch):
+            def w():
+                self.stack_push_op()
+                self.opmode = True
+                self.add_input(ch)
+            return w
+
+        char = unichr(ev.keyval)
+        keymap = {
+                u'q': ins_key(u'1'),
+                u'w': ins_key(u'2'),
+                u'e': ins_key(u'3'),
+                u'r': ins_key(u'4'),
+                u't': ins_key(u'5'),
+                u'y': ins_key(u'6'),
+                u'u': ins_key(u'7'),
+                u'i': ins_key(u'8'),
+                u'o': ins_key(u'9'),
+                u'p': ins_key(u'0'),
+                u'g': lambda: self.hit_switch_sign(None),
+                u'_': lambda: self.hit_switch_sign(None),
+
+                u'+': op_key(u'+'),
+                u's': op_key(u'+'),
+                u'-': op_key(u'−'),
+                u'f': op_key(u'−'),
+                u'*': op_key(u'×'),
+                u'a': op_key(u'×'),
+                u'/': op_key(u'÷'),
+                u'v': op_key(u'÷'),
+                u'\\': op_key(u'↑'),
+                u'b': op_key(u'↑'),
+                u'&': op_key(u'&'), # and
+                u'k': op_key(u'&'), # and
+                u'|': op_key(u'|'), # or
+                u'z': op_key(u'|'), # or
+                u'#': op_key(u'^'), # xor
+                u'd': op_key(u'^'), # xor
+                u'!': op_key(u'~'), # not
+                u'l': op_key(u'~'), # not
+                u'$': op_key(u'&~'), # and not
+                u'x': op_key(u'&~'), # and not
+                u'm': switch_key('is_mode'),
+                u'￣': switch_key('is_func'),
+                u'h': lambda: self.hit_push_stack(None),
+                u'j': lambda: self.hit_pop_stack(None),
+                u'(': lambda: self.hit_push_stack(None),
+                u')': lambda: self.hit_pop_stack(None),
+                u' ': lambda: self.hit_push_stack(None),
+                u'=': lambda: self.hit_execute(None),
+                u',': lambda: self.hit_execute(None),
+                u'\uff8d': lambda: self.hit_execute(None),
+                }
+        #print char
+        try:
+            action = keymap[char]
+        except KeyError:
+            return False
+
+        action()
+
+        return True
 
     def is_mode(self):
         return self.w_mode.get_active()
@@ -209,7 +264,35 @@ class ProCalcApp(hildon.Program):
     def add_input(self, value):
         self.w_input.insert_text(value, -1)
         self.w_input.set_position(-1)
+    def ins_input(self, value, pos=None):
+        if pos is None:
+            pos = self.w_input.get_position()
+        self.w_input.insert_text(value, pos)
+        self.w_input.set_position(pos + len(value))
 
+    def stack_push(self):
+        try:
+            self.stack.push(self.input)
+            self.input = ''
+        except StackError, e:
+            self.message(e.message, 2000)
+    def stack_pop(self):
+        try:
+            self.input = self.stack.pop()
+        except StackError, e:
+            self.message(e.message, 2000)
+    def stack_push_op(self):
+        try:
+            self.stack.push_op(self.input)
+            self.input = ''
+        except (StackError, OperationError), e:
+            self.message(e.message, 2000)
+    def stack_pop_op(self):
+        try:
+            self.input = self.stack.pop_op()
+        except (StackError, OperationError), e:
+            self.message(e.message, 2000)
+        
     def message(self, text, timeout=500):
         banner = hildon.hildon_banner_show_information(self.window, '', text)
         banner.set_timeout(timeout)
