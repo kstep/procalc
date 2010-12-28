@@ -116,9 +116,22 @@ class ProCalcApp(hildon.Program):
 
         menu.append(button('Unsigned', None, 'toggle'))
         menu.append(button('Portrait', self.hit_switch_portrait, 'toggle'))
-        menu.append(button('About'))
+        menu.append(button('About', self.show_about_info))
         menu.show_all()
         return menu
+
+    def show_about_info(self, b):
+        self.note("""
+Programmer's calculator, v0.1
+
+RPN calculator with bit-wise operations
+and infix operators emulation.
+
+Distributed AS IS under GPLv3 or greater
+without any warranty.
+
+Author: Konstantin Stepanov, © 2010
+                """)
 
     def hit_switch_portrait(self, b):
         flags = 0
@@ -350,6 +363,12 @@ class ProCalcApp(hildon.Program):
     def message(self, text, timeout=500):
         banner = hildon.hildon_banner_show_information(self.window, '', text)
         banner.set_timeout(timeout)
+        return banner
+
+    def note(self, text):
+        banner = hildon.hildon_note_new_information(self.window, text)
+        banner.connect('response', lambda s, ev: s.destroy())
+        banner.show()
         return banner
 
     def create_keypad(self):
