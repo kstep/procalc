@@ -24,7 +24,10 @@ class ProCalcApp(hildon.Program):
         input = hildon.Entry(gtk.HILDON_SIZE_AUTO)
 
         input.set_placeholder('Empty value')
-        input.set_properties(hildon_input_mode=gtk.HILDON_GTK_INPUT_MODE_ALPHA|gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL)
+        input.set_properties(
+                hildon_input_mode=gtk.HILDON_GTK_INPUT_MODE_ALPHA
+                | gtk.HILDON_GTK_INPUT_MODE_NUMERIC
+                | gtk.HILDON_GTK_INPUT_MODE_SPECIAL)
         stack.set_placeholder('Stack is empty')
         stack.set_properties(editable=False)
 
@@ -197,7 +200,7 @@ Author: Konstantin Stepanov, © 2010
         if text.startswith('-'):
             self.input = text.lstrip('-')
         else:
-            self.input = '-'+text
+            self.input = '-' + text
 
     def hit_backspace(self, b):
         self.input = self.input[:-1]
@@ -310,26 +313,33 @@ Author: Konstantin Stepanov, © 2010
 
     def is_mode(self):
         return self.w_mode.get_active()
+
     def set_mode(self, value):
         return self.w_mode.set_active(value)
+
     is_mode = property(is_mode, set_mode)
 
     def is_func(self):
         return self.w_func.get_active()
+
     def set_func(self, value):
         return self.w_func.set_active(value)
+
     is_func = property(is_func, set_func)
 
     def input(self):
         return self.w_input.get_text()
+
     def set_input(self, value):
         self.w_input.set_text(str(value))
         self.w_input.set_position(-1)
+
     input = property(input, set_input)
 
     def add_input(self, value):
         self.w_input.insert_text(value, -1)
         self.w_input.set_position(-1)
+
     def ins_input(self, value, pos=None):
         if pos is None:
             pos = self.w_input.get_position()
@@ -342,11 +352,13 @@ Author: Konstantin Stepanov, © 2010
             self.input = ''
         except StackError, e:
             self.message(e.message, 2000)
+
     def stack_pop(self):
         try:
             self.input = self.stack.pop()
         except StackError, e:
             self.message(e.message, 2000)
+
     def stack_push_op(self):
         try:
             self.stack.push_op(self.input)
@@ -355,12 +367,13 @@ Author: Konstantin Stepanov, © 2010
             self.message(e.message, 2000)
         except StackError:
             pass
+
     def stack_pop_op(self):
         try:
             self.input = self.stack.pop_op()
         except (StackError, OperationError), e:
             self.message(e.message, 2000)
-        
+
     def message(self, text, timeout=500):
         banner = hildon.hildon_banner_show_information(self.window, '', text)
         banner.set_timeout(timeout)
@@ -377,7 +390,7 @@ Author: Konstantin Stepanov, © 2010
             box = gtk.Table(rows, cols, homogeneous=True)
             box.set_row_spacings(rowsp)
             box.set_col_spacings(colsp)
-            box.set_properties(width_request=cols*75)
+            box.set_properties(width_request=cols * 75)
             return box
 
         buttons_box1 = create_table(5, 5, 4, 4)
@@ -386,16 +399,16 @@ Author: Konstantin Stepanov, © 2010
         # Decimal digits
         for i in range(0, 9):
             x, y = i % 3, 3 - (i / 3)
-            b = button(i+1, self.hit_digit)
-            buttons_box1.attach(b, x, x+1, y, y+1)
+            b = button(i + 1, self.hit_digit)
+            buttons_box1.attach(b, x, x + 1, y, y + 1)
         b = button(0, self.hit_digit)
         buttons_box1.attach(b, 0, 1, 4, 5)
 
         # Hex digits
         for i in range(0, 6):
             x, y = i % 2, 3 - (i / 2)
-            b = button(chr(i+65), self.hit_digit)
-            buttons_box1.attach(b, x+3, x+4, y, y+1)
+            b = button(chr(i + 65), self.hit_digit)
+            buttons_box1.attach(b, x + 3, x + 4, y, y + 1)
 
         # Other digital inputs
         b = button('.', self.hit_digit)
@@ -406,22 +419,22 @@ Author: Konstantin Stepanov, © 2010
         # Basic operations
         for i, c in enumerate(u'↑÷×−+'):
             b = button(str(c), self.hit_opkey)
-            buttons_box2.attach(b, 0, 1, i, i+1)
+            buttons_box2.attach(b, 0, 1, i, i + 1)
 
         # Stack operations
         hooks = [self.hit_push_stack, self.hit_pop_stack]
         for i, c in enumerate((u'st↓', u'st↑')):
             b = button(c, hooks[i])
-            buttons_box1.attach(b, i+3, i+4, 4, 5)
+            buttons_box1.attach(b, i + 3, i + 4, 4, 5)
 
         # Binary operations
         for i, c in enumerate(('^', '&~', '&', '~', '|')):
             b = button(c, self.hit_opkey)
-            buttons_box2.attach(b, 1, 2, i, i+1)
+            buttons_box2.attach(b, 1, 2, i, i + 1)
 
         for i, c in enumerate(('<<', '>>')):
             b = button(c, self.hit_opkey)
-            buttons_box2.attach(b, 2, 3, i, i+1)
+            buttons_box2.attach(b, 2, 3, i, i + 1)
 
         # Execute
         b = button('=', self.hit_execute)

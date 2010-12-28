@@ -14,7 +14,7 @@ class OpStack(object):
         Pop value from stack (like get()+drop())
         """
         start = self.buffer.get_iter_at_line(index)
-        end = self.buffer.get_iter_at_line(index+1)
+        end = self.buffer.get_iter_at_line(index + 1)
         text = self.buffer.get_text(start, end)
         if not text:
             raise StackError('Stack is empty')
@@ -36,7 +36,7 @@ class OpStack(object):
         Get value from stack w/o modification
         """
         start = self.buffer.get_iter_at_line(index)
-        end = self.buffer.get_iter_at_line(index+1)
+        end = self.buffer.get_iter_at_line(index + 1)
         text = self.buffer.get_text(start, end)
         return text.strip()
 
@@ -48,16 +48,16 @@ class OpStack(object):
         if not data:
             raise StackError('No empty values allowed on the stack')
         start = self.buffer.get_iter_at_line(index)
-        end = self.buffer.get_iter_at_line(index+1)
+        end = self.buffer.get_iter_at_line(index + 1)
         self.buffer.delete(start, end)
-        self.buffer.insert(start, data+'\n')
+        self.buffer.insert(start, data + '\n')
 
     def drop(self, index):
         """
         Drop value from stack
         """
         start = self.buffer.get_iter_at_line(index)
-        end = self.buffer.get_iter_at_line(index+1)
+        end = self.buffer.get_iter_at_line(index + 1)
         self.buffer.delete(start, end)
 
     def clear(self):
