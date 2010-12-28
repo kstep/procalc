@@ -285,8 +285,10 @@ class ProCalcApp(hildon.Program):
         try:
             self.stack.push_op(self.input)
             self.input = ''
-        except (StackError, OperationError), e:
+        except OperationError, e:
             self.message(e.message, 2000)
+        except StackError:
+            pass
     def stack_pop_op(self):
         try:
             self.input = self.stack.pop_op()
