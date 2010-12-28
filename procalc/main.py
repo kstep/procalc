@@ -6,7 +6,8 @@ import hildon
 from procalc import operations
 from procalc.operations import OperationError
 from procalc.stack import OpStack, StackError
-from procalc.util import button, switch, bin, dec, transpose_table
+from procalc.helpers import button, switch, transpose_table
+from procalc.converters import bin, dec
 
 class ProCalcApp(hildon.Program):
 

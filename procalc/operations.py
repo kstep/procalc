@@ -2,7 +2,7 @@
 
 __all__ = ['op_noop', 'op_oper', 'op_add', 'op_sub', 'op_mul', 'op_div', 'op_mod', 'op_pow', 'op_or', 'op_xor', 'op_and', 'op_andnot', 'op_not', 'op_shl', 'op_shr']
 
-from procalc.util import dec
+from procalc.converters import dec
 
 class OperationError(ValueError):
     pass
