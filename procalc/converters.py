@@ -14,7 +14,7 @@ def bin(x):
     return r
 
 def oct(x):
-    r = '0o'+__builtins__.oct(x).lstrip('-0')
+    r = '0o' + __builtins__.oct(x).lstrip('-0')
     if x < 0:
         r = '-' + r
     return r
