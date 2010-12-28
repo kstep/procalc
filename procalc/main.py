@@ -194,7 +194,7 @@ class ProCalcApp(hildon.Program):
         pass
 
     def hit_keyboard(self, w, ev):
-        def switch_key(attr):
+        def mod_key(attr):
             def w():
                 setattr(self, attr, not getattr(self, attr))
             return w
@@ -214,6 +214,11 @@ class ProCalcApp(hildon.Program):
                 self.add_input(ch)
             return w
 
+        def act_key(meth):
+            def w():
+                getattr(self, meth)(None)
+            return w
+
         char = unichr(ev.keyval)
         keymap = {
                 u'q': ins_key(u'1'),
@@ -226,8 +231,8 @@ class ProCalcApp(hildon.Program):
                 u'i': ins_key(u'8'),
                 u'o': ins_key(u'9'),
                 u'p': ins_key(u'0'),
-                u'g': lambda: self.hit_switch_sign(None),
-                u'_': lambda: self.hit_switch_sign(None),
+                u'g': act_key('hit_switch_sign'),
+                u'_': act_key('hit_switch_sign'),
 
                 u'+': op_key(u'+'),
                 u's': op_key(u'+'),
@@ -249,16 +254,17 @@ class ProCalcApp(hildon.Program):
                 u'l': op_key(u'~'), # not
                 u'$': op_key(u'&~'), # and not
                 u'x': op_key(u'&~'), # and not
-                u'm': switch_key('is_mode'),
-                u'￣': switch_key('is_func'),
-                u'h': lambda: self.hit_push_stack(None),
-                u'j': lambda: self.hit_pop_stack(None),
-                u'(': lambda: self.hit_push_stack(None),
-                u')': lambda: self.hit_pop_stack(None),
-                u' ': lambda: self.hit_push_stack(None),
-                u'=': lambda: self.hit_execute(None),
-                u',': lambda: self.hit_execute(None),
-                u'\uff8d': lambda: self.hit_execute(None),
+                u'm': mod_key('is_mode'),
+                u'￣': mod_key('is_func'),
+                u'h': act_key('hit_push_stack'),
+                u'j': act_key('hit_pop_stack'),
+                u'(': act_key('hit_push_stack'),
+                u')': act_key('hit_pop_stack'),
+                u' ': act_key('hit_push_stack'),
+                u'=': act_key('hit_execute'),
+                u',': act_key('hit_execute'),
+                u'\uff8d': act_key('hit_execute'),
+                u'c': act_key('hit_clear'),
                 }
         #print char
         try:
@@ -267,7 +273,6 @@ class ProCalcApp(hildon.Program):
             return False
 
         action()
-
         return True
 
     def is_mode(self):
