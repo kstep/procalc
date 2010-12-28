@@ -129,7 +129,10 @@ class ProCalcApp(hildon.Program):
     def hit_execute(self, b):
         self.stack_push_op()
         self.stack_pop_op()
-        self.input = self.show_filter(dec(self.input))
+        try:
+            self.input = self.show_filter(dec(self.input))
+        except ValueError, e:
+            self.message(e.message.capitalize(), 2000)
 
     def hit_opkey(self, b):
         op = b.get_label()
@@ -186,9 +189,10 @@ class ProCalcApp(hildon.Program):
         base_name = b.get_label()
         self.show_filter = dict(Bin=bin, Oct=oct, Dec=str, Hex=hex).get(base_name, str)
         if not self.opmode:
-            text = self.input
-            if text:
-                self.input = self.show_filter(dec(text))
+            try:
+                self.input = self.show_filter(dec(self.input))
+            except ValueError, e:
+                self.message(e.message.capitalize(), 2000)
 
     def hit_mode(self, b):
         pass
