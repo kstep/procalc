@@ -7,7 +7,7 @@ from procalc import operations
 from procalc.operations import OperationError
 from procalc.stack import OpStack, StackError
 from procalc.helpers import button, switch, transpose_table
-from procalc.converters import bin, dec
+from procalc.converters import bin, oct, dec, hex
 
 class ProCalcApp(hildon.Program):
 
@@ -175,7 +175,7 @@ Author: Konstantin Stepanov, © 2010
             self.stack_push_op()
 
         if self.is_mode:
-            bases = {'2': '0b', '8': '0', '0': '', 'A': '0x'}
+            bases = {'2': '0b', '8': '0o', '0': '', 'A': '0x'}
             base = bases.get(b.get_label(), None)
             if base is not None:
                 text = self.input
