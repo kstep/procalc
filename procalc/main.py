@@ -10,15 +10,14 @@ from procalc.util import button, switch, bin, dec, transpose_table
 
 class ProCalcApp(hildon.Program):
 
-    def __init__(self):
-        super(ProCalcApp, self).__init__()
-
+    def init_window(self):
         self.window = hildon.Window()
         self.window.set_title("ProCalc")
         self.window.connect("delete_event", self.quit)
         self.window.connect("key-press-event", self.hit_keyboard)
         self.add_window(self.window)
 
+    def init_controls(self):
         keypad = self.create_keypad()
         stack = hildon.TextView()
         input = hildon.Entry(gtk.HILDON_SIZE_AUTO)
@@ -28,8 +27,13 @@ class ProCalcApp(hildon.Program):
         stack.set_placeholder('Stack is empty')
         stack.set_properties(editable=False)
 
+        self.w_stack = stack
+        self.w_input = input
+        self.w_keypad = keypad
+
+    def init_layout(self):
         panner = hildon.PannableArea()
-        panner.add_with_viewport(stack)
+        panner.add_with_viewport(self.w_stack)
         panner.set_properties(
                 mov_mode=hildon.MOVEMENT_MODE_VERT,
                 size_request_policy=hildon.SIZE_REQUEST_MINIMUM,
@@ -39,32 +43,56 @@ class ProCalcApp(hildon.Program):
         land_box = gtk.HBox()
         land_box.set_spacing(4)
         land_box.pack_start(panner)
-        land_box.pack_end(keypad[1])
-        land_box.pack_end(keypad[0])
+        land_box.pack_end(self.w_keypad[1])
+        land_box.pack_end(self.w_keypad[0])
 
         port_box = gtk.VBox()
         port_box.set_spacing(4)
         port_box.set_properties(no_show_all=True)
 
         vbox = gtk.VBox()
-        vbox.pack_start(input)
+        vbox.pack_start(self.w_input)
         vbox.pack_start(land_box)
         vbox.pack_start(port_box)
 
         self.w_panner = panner
-        self.w_stack = stack
-        self.w_input = input
-        self.w_keypad = keypad
         self.w_portrait_box = port_box
         self.w_landscape_box = land_box
 
-        self.stack = OpStack(stack.get_buffer(), *(getattr(operations, o) for o in operations.__all__))
+        self.window.add(vbox)
+
+    def init_menu(self):
+        menu_bar = self.create_menu()
+        self.window.set_app_menu(menu_bar)
+
+    def init_stack(self):
+        ops = (getattr(operations, o) for o in operations.__all__)
+        self.stack = OpStack(self.w_stack.get_buffer(), *ops)
+
+    def init_state(self):
         self.opmode = False
         self.show_filter = str
 
-        menu_bar = self.create_menu()
-        self.window.set_app_menu(menu_bar)
-        self.window.add(vbox)
+    def __init__(self):
+        super(ProCalcApp, self).__init__()
+
+        # 0. set state attributes
+        self.init_state()
+
+        # 1. create window
+        self.init_window()
+
+        # 2. init main controls
+        self.init_controls()
+
+        # 3. place controls into layout
+        self.init_layout()
+
+        # 4. init main menu
+        self.init_menu()
+
+        # 5. init stack
+        self.init_stack()
 
     def quit(self, *args):
         gtk.main_quit()
