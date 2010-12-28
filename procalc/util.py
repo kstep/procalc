@@ -3,6 +3,20 @@
 import gtk
 import hildon
 
+def picker(label, onclicked=None, *items):
+    selector = hildon.TouchSelector(text=True)
+    for i in items:
+        selector.append_text(str(i))
+
+    button = hildon.PickerButton(gtk.HILDON_SIZE_THUMB_HEIGHT, hildon.BUTTON_ARRANGEMENT_HORIZONTAL)
+    button.set_title(label)
+    button.set_selector(selector)
+
+    if onclicked:
+        button.connect('value-changed', onclicked)
+
+    return button
+
 def transpose_table(table):
     cols = table.get_property('n-columns')
     rows = table.get_property('n-rows')
