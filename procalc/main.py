@@ -216,13 +216,15 @@ class ProCalcApp(hildon.Program):
         return banner
 
     def create_keypad(self):
-        buttons_box1 = gtk.Table(5, 5, homogeneous=True)
-        buttons_box1.set_row_spacings(4)
-        buttons_box1.set_col_spacings(4)
+        def create_table(rows, cols, rowsp, colsp):
+            box = gtk.Table(rows, cols, homogeneous=True)
+            box.set_row_spacings(rowsp)
+            box.set_col_spacings(colsp)
+            box.set_properties(width_request=cols*75)
+            return box
 
-        buttons_box2 = gtk.Table(5, 3, homogeneous=True)
-        buttons_box2.set_row_spacings(4)
-        buttons_box2.set_col_spacings(4)
+        buttons_box1 = create_table(5, 5, 4, 4)
+        buttons_box2 = create_table(5, 3, 4, 4)
 
         # Decimal digits
         for i in range(0, 9):
