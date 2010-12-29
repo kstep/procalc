@@ -102,7 +102,7 @@ def dec(s):
     bitn = bits(base - 1)
 
     if base == 10:
-        return (float if '.' in s else int)(s)
+        return float(s)
     else:
         i, _, f = x.lstrip('0bxo').partition('.')
         r = int(i or '0', base)
