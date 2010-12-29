@@ -94,6 +94,11 @@ def dec(s):
     >>> dec('0b1.01')
     1.25
     '''
+    if isinstance(s, float):
+        return s
+    elif isinstance(s, int):
+        return float(s)
+
     x = s.lstrip('-')
     if not x:
         return 0
@@ -110,4 +115,18 @@ def dec(s):
             r += sum(float(int(n, base)) / (base << bitn * m) for m, n in enumerate(f))
 
     return -r if s.startswith('-') else r
+
+def fint(x):
+    '''
+    >>> fint(10.0)
+    4621819117588971520L
+    '''
+    return struct.unpack('q', struct.pack('d', dec(x)))[0]
+
+def intf(x):
+    '''
+    >>> intf(4621819117588971520L)
+    10.0
+    '''
+    return struct.unpack('d', struct.pack('q', x))[0]
 
