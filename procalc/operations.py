@@ -7,7 +7,7 @@ __all__ = [
             'op_sum', 'op_prod', 'op_mean', 'op_stdev'  # statistics
             ]
 
-from procalc.converters import dec
+from procalc.converters import dec, fint
 
 class OperationError(ValueError):
     pass
@@ -100,7 +100,7 @@ def op_mul(a, b):
 def op_div(a, b):
     return a / b
 
-@operation('%', 2, dec, dec)
+@operation('%', 2, int, int)
 def op_mod(a, b):
     return a % b
 
@@ -108,31 +108,31 @@ def op_mod(a, b):
 def op_pow(a, b):
     return a ** b
 
-@operation('^', 2, dec, dec)
+@operation('^', 2, fint, fint)
 def op_xor(a, b):
     return a ^ b
 
-@operation('|', 2, dec, dec)
+@operation('|', 2, fint, fint)
 def op_or(a, b):
     return a | b
 
-@operation('&', 2, dec, dec)
+@operation('&', 2, fint, fint)
 def op_and(a, b):
     return a & b
 
-@operation('~', 4, dec)
+@operation('~', 4, fint)
 def op_not(a):
     return ~a
 
-@operation('&~', 2, dec, dec)
+@operation('&~', 2, fint, fint)
 def op_andnot(a, b):
     return a & ~b
 
-@operation('>>', 2, dec, dec)
+@operation('>>', 2, fint, fint)
 def op_shr(a, b):
     return a >> b
 
-@operation('<<', 2, dec, dec)
+@operation('<<', 2, fint, fint)
 def op_shl(a, b):
     return a << b
 
