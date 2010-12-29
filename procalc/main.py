@@ -7,7 +7,7 @@ from procalc import operations
 from procalc.operations import OperationError
 from procalc.stack import OpStack, StackError
 from procalc.helpers import button, switch, transpose_table
-from procalc.converters import binf as bin, octf as oct, dec, hexf as hex
+from procalc.converters import bin, oct, dec, hex
 
 class ProCalcApp(hildon.Program):
 
