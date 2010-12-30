@@ -6,7 +6,7 @@ import hildon
 from procalc import operations
 from procalc.operations import OperationError
 from procalc.stack import OpStack, StackError
-from procalc.helpers import button, switch, transpose_table
+from procalc.helpers import button, switch, picker, selector, liststore, transpose_table
 from procalc.converters import bin, oct, dec, hex
 
 class ProCalcApp(hildon.Program):
@@ -105,20 +105,26 @@ class ProCalcApp(hildon.Program):
         menu = hildon.AppMenu()
         switch(menu, 2, self.hit_switch_base, 'Bin', 'Oct', 'Dec', 'Hex')
 
-        nums = gtk.ListStore(str)
-        for i in range(0, 11):
-            nums.append((str(i),))
+        # TODO
+        # Integer - bit-wise operations on floats are as on ints,
+        # tend to work in integers, except one of operands is float,
+        # division always converts to float,
+        # Float - bit-wise operations on floats are as on bit arrays,
+        # all numbers tend to be converted to floats,
+        # Raw - like float, but show inner binary representation
+        # of floats in non-decimal modes, doesn't make sense for
+        # integers as integers are always in "raw" format.
+        menu.append(picker('Format', None, 'Integer', 'Float', 'Raw'))
 
-        selector = hildon.TouchSelector()
-        selector.append_text_column(nums, True)
-        selector.append_text_column(nums, True)
+        # TODO
+        # First number is minimal integer part length to pad to with
+        # zeroes (-1 means no leading zero for numbers less than 1),
+        # second number is number of digits left after decimal
+        # point (0 means always work with integers, -1 - no rounding
+        # is applied).
+        nums = liststore(*range(-1, 11))
+        menu.append(picker('Precision', None, selector(nums, nums)))
 
-        b = hildon.PickerButton(gtk.HILDON_SIZE_THUMB_HEIGHT, hildon.BUTTON_ARRANGEMENT_HORIZONTAL)
-        b.set_title('Precision')
-        b.set_selector(selector)
-        menu.append(b)
-
-        menu.append(button('Unsigned', None, 'toggle'))
         menu.append(button('Portrait', self.hit_switch_portrait, 'toggle'))
         menu.append(button('About', self.show_about_info))
         menu.show_all()
