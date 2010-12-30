@@ -362,13 +362,18 @@ Author: Konstantin Stepanov, © 2010
     def stack_push(self):
         try:
             self.stack.push(self.input)
-            self.input = ''
+            if not self.is_func:
+                self.input = ''
         except StackError, e:
             self.message(e.message, 2000)
 
     def stack_pop(self):
         try:
-            self.input = self.stack.pop()
+            data = self.stack.pop()
+            input = self.input
+            if self.is_func and input:
+                self.stack.push(input)
+            self.input = data
         except StackError, e:
             self.message(e.message, 2000)
 
