@@ -3,10 +3,33 @@
 import gtk
 import hildon
 
-def picker(label, onclicked=None, *items):
-    selector = hildon.TouchSelector(text=True)
+def liststore(*items):
+    store = gtk.ListStore(str)
     for i in items:
-        selector.append_text(str(i))
+        store.append((str(i),))
+    return store
+
+def selector(*columns):
+    select = hildon.TouchSelector()
+
+    for i, column in enumerate(columns):
+        if not isinstance(column, gtk.ListStore):
+            store = liststore(column)
+        else:
+            store = column
+        select.append_text_column(store, True)
+        select.set_active(i, 0)
+
+    return select
+
+def picker(label, onclicked=None, *items):
+    if len(items) == 1 and isinstance(items[0], hildon.TouchSelector):
+        selector = items[0]
+    else:
+        selector = hildon.TouchSelector(text=True)
+        for i in items:
+            selector.append_text(str(i))
+        selector.set_active(0, 0)
 
     button = hildon.PickerButton(gtk.HILDON_SIZE_THUMB_HEIGHT, hildon.BUTTON_ARRANGEMENT_HORIZONTAL)
     button.set_title(label)
