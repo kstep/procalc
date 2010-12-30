@@ -11,7 +11,9 @@ class OpStack(object):
             buffer_ = TextBuffer()
 
         self._buffer = buffer_
+        buffer_.set_text('')
         self._ops = dict(((o.op_name, o) for o in ops))
+        self._stack = list()
 
     def get_line_iters(self, index):
         start = self._buffer.get_iter_at_line(index)
@@ -21,6 +23,9 @@ class OpStack(object):
     @property
     def buffer(self):
         return self._buffer
+
+    def reflect(self):
+        self._buffer.set_text('\n'.join(str(i) for i in self._stack))
 
     def add_op(self, op):
         self._ops[op.op_name] = op
@@ -39,59 +44,49 @@ class OpStack(object):
         """
         Pop value from stack (like get()+drop())
         """
-        start, end = self.get_line_iters(index)
-        text = self._buffer.get_text(start, end)
-        if not text:
+        try:
+            text = self._stack.pop(index)
+        except IndexError:
             raise StackError('Stack is empty')
-        self._buffer.delete(start, end)
-        return text.strip()
+        self.reflect()
+        return text
 
     def push(self, data, index=0):
         """
         Push value into stack
         """
-        data = str(data)
-        if not data:
+        if data is None or data == '':
             raise StackError('No empty values allowed on the stack')
-        iter = self._buffer.get_iter_at_line(index)
-        self._buffer.insert(iter, data + '\n')
+        self._stack.insert(index, data)
+        self.reflect()
 
     def get(self, index=0):
         """
         Get value from stack w/o modification
         """
-        text = self._buffer.get_text(*self.get_line_iters(index))
-        return text.strip()
+        return self._stack[index]
 
     def put(self, data, index=0):
         """
         Put value into stack, stack doesn't grow
         """
-        data = str(data)
-        if not data:
+        if data is None or data == '':
             raise StackError('No empty values allowed on the stack')
-        start, end = self.get_line_iters(index)
-        self._buffer.delete(start, end)
-        self._buffer.insert(start, data + '\n')
+        self._stack[index] = data
+        self.reflect()
 
     def drop(self, index):
         """
         Drop value from stack
-        >>> import gtk
-        >>> buf = gtk.TextBuffer()
-        >>> it = buf.get_start_iter()
-        >>> buf.insert(it, "random line 1\\nrandom line 2\\n")
-        >>> stack = OpStack(buf)
-        >>> stack.drop(0)
-        >>> buf.get_text(buf.get_iter_at_line(0), buf.get_iter_at_line(1))
-        'random line 2\\n'
         """
-        self._buffer.delete(*self.get_line_iters(index))
+        self._stack.pop(index)
+        self.reflect()
 
     def clear(self):
         """
         Clear stack
         """
+        self._stack = list()
         self._buffer.set_text('')
 
     __getitem__ = get
@@ -139,27 +134,15 @@ class OpStack(object):
 
     def __iter__(self):
         '''
-        >>> import gtk
-        >>> buf = gtk.TextBuffer()
-        >>> it = buf.get_start_iter()
-        >>> for i in range(0, 4):
-        ...   buf.insert(it, str(i) + '\\n')
-        >>> stack = OpStack(buf)
+        >>> stack = OpStack()
+        >>> for i in reversed(range(0, 4)):
+        ...   stack.push(str(i))
         >>> for line, item in stack:
         ...   print (line, item)
-        ... 
         (0, '0')
         (1, '1')
         (2, '2')
         (3, '3')
         >>> 
         '''
-        start = self._buffer.get_start_iter()
-        end = self._buffer.get_start_iter()
-        while end.forward_to_line_end():
-            item = self._buffer.get_text(start, end).strip()
-            if not item:
-                break
-            yield start.get_line(), item
-            start.forward_line()
-
+        return enumerate(self._stack)
