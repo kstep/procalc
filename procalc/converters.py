@@ -1,6 +1,12 @@
 # coding: utf-8
+from __future__ import division
 
+import math
 import struct
+import __builtin__ as core
+
+def strdig(d):
+    return str(d) if d < 10 else chr(d + 55)
 
 def bits(n):
     '''
@@ -15,66 +21,39 @@ def bits(n):
         n >>= 1
     return c
 
-def basef(x, base=2):
-    '''
-    Convert from decimal floating point number to string representation of some base.
-    base := 2 | 8 | 16
+def basef(x, base=2, prec=10):
+    frac = abs(x - int(x))
+    result = ''
+    while frac or len(result) < prec:
+        d = int(frac * base)
+        frac -= d
+        result = strdig(d) + result
 
-    >>> basef(10)
-    '0b1010'
-    >>> basef(0.25)
-    '0b0.01'
-    >>> basef(10.5)
-    '0b1010.1'
-    >>> basef(10.0625, 16)
-    '0xA.1'
-    >>> basef(8.125, 8)
-    '0o10.1'
-    '''
-    prefix = ({2: '0b', 8: '0o', 16: '0x'}).get(base)
-    bitn = bits(base - 1)
+    if result:
+        result = '.' + result
+    return result
 
-    def tobin(x):
-        s = ''
-        while x:
-            s = str(x & 1) + s
-            x >>= 1
-        return s
+def bin(x):
+    r = ''
+    i = abs(int(x))
+    while i:
+        r += str(i & 1)
+        i >>= 1
+    r = '0b' + (r or '0')
+    if i < 0:
+        r = '-' + r
+    return r + basef(x, 2)
 
-    v = "".join(tobin(ord(i)).rjust(8, '0') for i in reversed(struct.pack('d', x)))
-    sign, exp, mant = int(v[0]), int(v[1:12], 2) - 1023 + 1, '1' + v[12:] 
+def oct(x):
+    r = '0o' + core.oct(abs(int(x))).lstrip('0')
+    if r == '0o':
+        r += '0'
+    if i < 0:
+        r = '-' + r
+    return r + basef(x, 8)
 
-    sign, intg, frac = '-' if sign else '', '', ''
-    if exp < 0:
-        frac = ('0' * -exp) + mant
-        intg = '0'
-
-    elif exp > 0:
-        intg = mant[0:exp]
-        frac = mant[exp:]
-
-    if base > 2:
-        i, f = '', ''
-        while intg:
-            d, intg = int(intg[-bitn:], 2), intg[:-bitn]
-            d = str(d) if d < 10 else chr(d + 55)
-            i = d + i
-        while frac:
-            d, frac = int(frac[:bitn], 2), frac[bitn:]
-            d = str(d) if d < 10 else chr(d + 55)
-            f = f + d
-
-    else:
-        i, f = intg, frac
-
-    if f:
-        f = '.' + f
-
-    return sign + prefix + i + f.rstrip('.0')
-
-hex = lambda x: basef(x, 16)
-oct = lambda x: basef(x, 8)
-bin = lambda x: basef(x, 2)
+def hex(x):
+    return core.hex(int(x)).upper().replace('0X', '0x') + basef(x)
 
 def dec(s):
     '''
@@ -94,10 +73,8 @@ def dec(s):
     >>> dec('0b1.01')
     1.25
     '''
-    if isinstance(s, float):
+    if isinstance(s, (long, int, float)):
         return s
-    elif isinstance(s, int):
-        return float(s)
 
     x = s.lstrip('-')
     if not x:
@@ -107,12 +84,16 @@ def dec(s):
     bitn = bits(base - 1)
 
     if base == 10:
-        return float(s)
+        return (float if '.' in s or 'e' in s else int)(s)
     else:
-        i, _, f = x.lstrip('0bxo').partition('.')
+        x = x.lstrip('0bxo')
+        i, _, e = x.partition('e')
+        i, _, f = i.partition('.')
         r = int(i or '0', base)
         if f:
-            r += sum(float(int(n, base)) / (base << bitn * m) for m, n in enumerate(f))
+            r += sum(int(n, base) / (base << bitn * m) for m, n in enumerate(f))
+        if e:
+            r = float(r * base ** int(e))
 
     return -r if s.startswith('-') else r
 
