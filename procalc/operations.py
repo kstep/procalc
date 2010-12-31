@@ -4,6 +4,9 @@ from __future__ import division
 import math
 from procalc.converters import dec, fint
 
+def native(x):
+    return x
+
 __all__ = [
             'op_noop', 'op_oper',  # service
             'op_add', 'op_sub', 'op_mul', 'op_div','op_mod', 'op_pow',  # standard
@@ -59,19 +62,19 @@ def operation_for_all(name, prio, type_):
         return wrapper
     return decorator
 
-@operation_for_all('Σ', -2, dec)
+@operation_for_all('Σ', -2, native)
 def op_sum(*args):
     return sum(args)
 
-@operation_for_all('Π', -1, dec)
+@operation_for_all('Π', -1, native)
 def op_prod(*args):
     return reduce(lambda x, y: x * y, args, 1)
 
-@operation_for_all('μ', -3, dec)
+@operation_for_all('μ', -3, native)
 def op_mean(*args):
     return sum(args) / len(args)
 
-@operation_for_all('σ', -3, dec)
+@operation_for_all('σ', -3, native)
 def op_stdev(*args):
     mean = sum(args) / len(args)
     disp = sum((x - mean) ** 2 for x in args) / len(args)
@@ -85,19 +88,19 @@ def op_noop():
 def op_oper():
     pass
 
-@operation('+', 1, dec, dec)
+@operation('+', 1, native, native)
 def op_add(a, b):
     return a + b
 
-@operation('−', 1, dec, dec)
+@operation('−', 1, native, native)
 def op_sub(a, b):
     return a - b
 
-@operation('×', 2, dec, dec)
+@operation('×', 2, native, native)
 def op_mul(a, b):
     return a * b
 
-@operation('÷', 2, dec, dec)
+@operation('÷', 2, native, native)
 def op_div(a, b):
     return a / b
 
@@ -105,35 +108,35 @@ def op_div(a, b):
 def op_mod(a, b):
     return a % b
 
-@operation('↑', 3, dec, dec)
+@operation('↑', 3, native, native)
 def op_pow(a, b):
     return a ** b
 
-@operation('^', 2, fint, fint)
+@operation('^', 2, int, int)
 def op_xor(a, b):
     return a ^ b
 
-@operation('|', 2, fint, fint)
+@operation('|', 2, int, int)
 def op_or(a, b):
     return a | b
 
-@operation('&', 2, fint, fint)
+@operation('&', 2, int, int)
 def op_and(a, b):
     return a & b
 
-@operation('~', 4, fint)
+@operation('~', 4, int)
 def op_not(a):
     return ~a
 
-@operation('&~', 2, fint, fint)
+@operation('&~', 2, int, int)
 def op_andnot(a, b):
     return a & ~b
 
-@operation('>>', 2, fint, fint)
+@operation('>>', 2, int, int)
 def op_shr(a, b):
     return a >> b if b >= 0 else a << -b
 
-@operation('<<', 2, fint, fint)
+@operation('<<', 2, int, int)
 def op_shl(a, b):
     return a << b if b >= 0 else a >> -b
 
