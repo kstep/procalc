@@ -73,7 +73,7 @@ def switch(menu, active=0, onclicked=None, *labels):
     b = None
     buttons = list()
     for l in labels:
-        b = button(l, onclicked, 'radio', b)
+        b = button(l, None, 'radio', b)
         b.set_label(l)
         b.set_mode(False)
 
@@ -81,4 +81,7 @@ def switch(menu, active=0, onclicked=None, *labels):
         buttons.append(b)
 
     buttons[active].set_active(True)
+    if onclicked:
+        for b in buttons:
+            b.connect('clicked', onclicked)
     return buttons
