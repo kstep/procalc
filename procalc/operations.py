@@ -1,4 +1,8 @@
 # coding: utf-8
+from __future__ import division
+
+import math
+from procalc.converters import dec, fint
 
 __all__ = [
             'op_noop', 'op_oper',  # service
@@ -6,8 +10,6 @@ __all__ = [
             'op_or', 'op_xor', 'op_and', 'op_andnot', 'op_not', 'op_shl', 'op_shr',  # bitwise
             'op_sum', 'op_prod', 'op_mean', 'op_stdev'  # statistics
             ]
-
-from procalc.converters import dec, fint
 
 class OperationError(ValueError):
     pass
@@ -71,7 +73,6 @@ def op_mean(*args):
 
 @operation_for_all('σ', -3, dec)
 def op_stdev(*args):
-    import math
     mean = sum(args) / len(args)
     disp = sum((x - mean) ** 2 for x in args) / len(args)
     return math.sqrt(disp)
@@ -130,9 +131,9 @@ def op_andnot(a, b):
 
 @operation('>>', 2, fint, fint)
 def op_shr(a, b):
-    return a >> b
+    return a >> b if b >= 0 else a << -b
 
 @operation('<<', 2, fint, fint)
 def op_shl(a, b):
-    return a << b
+    return a << b if b >= 0 else a >> -b
 
