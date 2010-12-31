@@ -103,12 +103,26 @@ def fint(x):
     >>> fint(10.0)
     4621819117588971520L
     '''
-    return struct.unpack('q', struct.pack('d', dec(x)))[0]
+    if isinstance(x, float):
+        return struct.unpack('q', struct.pack('d', x))[0]
+    else:
+        return int(x)
 
 def intf(x):
     '''
     >>> intf(4621819117588971520L)
     10.0
     '''
-    return struct.unpack('d', struct.pack('q', x))[0]
+    if isinstance(x, (int, long)):
+        return struct.unpack('d', struct.pack('q', x))[0]
+    else:
+        return x
+
+def sint(x):
+    if x < 0:
+        return int(x)
+    return struct.unpack('q', struct.pack('Q', int(x)))[0]
+
+def uint(x):
+    return struct.unpack('Q', struct.pack('q', int(x)))[0]
 
