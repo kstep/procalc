@@ -126,3 +126,13 @@ def sint(x):
 def uint(x):
     return struct.unpack('Q', struct.pack('q', int(x)))[0]
 
+def raw(x):
+    if isinstance(x, float):
+        f, t = 'd', 'q'
+    else:
+        x = int(x)
+        if x > 0:
+            return x
+        f, t = 'q', 'Q'
+    return struct.unpack(t, struct.pack(f, x))[0]
+
