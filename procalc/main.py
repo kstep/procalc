@@ -233,6 +233,7 @@ Author: Konstantin Stepanov, © 2010
         if not self.opmode:
             try:
                 self.input = self.filter(dec(self.input))
+                self.w_buffer.set_text(self.stack.as_str(self.filter))
             except ValueError, e:
                 self.message(e.message.capitalize(), 2000)
 
@@ -359,7 +360,7 @@ Author: Konstantin Stepanov, © 2010
     def stack_push(self):
         try:
             self.stack.push(self.input)
-            self.w_buffer.set_text(str(self.stack))
+            self.w_buffer.set_text(self.stack.as_str(self.filter))
             if not self.is_func:
                 self.input = ''
         except StackError, e:
@@ -368,7 +369,7 @@ Author: Konstantin Stepanov, © 2010
     def stack_pop(self):
         try:
             data = self.stack.pop()
-            self.w_buffer.set_text(str(self.stack))
+            self.w_buffer.set_text(self.stack.as_str(self.filter))
             input = self.input
             if self.is_func and input:
                 self.stack.push(input)
@@ -379,7 +380,7 @@ Author: Konstantin Stepanov, © 2010
     def stack_push_op(self):
         try:
             self.stack.push_op(self.input)
-            self.w_buffer.set_text(str(self.stack))
+            self.w_buffer.set_text(self.stack.as_str(self.filter))
             self.input = ''
         except OperationError, e:
             self.message(e.message, 2000)
@@ -389,7 +390,7 @@ Author: Konstantin Stepanov, © 2010
     def stack_pop_op(self):
         try:
             self.input = self.filter(self.stack.pop_op())
-            self.w_buffer.set_text(str(self.stack))
+            self.w_buffer.set_text(self.stack.as_str(self.filter))
         except (StackError, OperationError), e:
             self.message(e.message, 2000)
 
