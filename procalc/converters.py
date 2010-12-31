@@ -24,10 +24,11 @@ def bits(n):
 def basef(x, base=2, prec=10):
     frac = abs(x - int(x))
     result = ''
-    while frac or len(result) < prec:
-        d = int(frac * base)
+    while frac and len(result) < prec:
+        frac *= base
+        d = int(frac)
         frac -= d
-        result = strdig(d) + result
+        result += strdig(d)
 
     if result:
         result = '.' + result
@@ -48,12 +49,12 @@ def oct(x):
     r = '0o' + core.oct(abs(int(x))).lstrip('0')
     if r == '0o':
         r += '0'
-    if i < 0:
+    if x < 0:
         r = '-' + r
     return r + basef(x, 8)
 
 def hex(x):
-    return core.hex(int(x)).upper().replace('0X', '0x') + basef(x)
+    return core.hex(int(x)).upper().replace('0X', '0x') + basef(x, 16)
 
 def dec(s):
     '''

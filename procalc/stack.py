@@ -1,31 +1,16 @@
-
-from procalc.operations import op_oper
+function = type(lambda: 1)
 
 class StackError(Exception):
     pass
 
 class OpStack(object):
-    def __init__(self, buffer_, *ops):
-        if not buffer_:
-            from gtk import TextBuffer
-            buffer_ = TextBuffer()
-
-        self._buffer = buffer_
-        buffer_.set_text('')
+    def __init__(self, guard=None, *ops):
         self._ops = dict(((o.op_name, o) for o in ops))
+        self._guard = guard or (lambda x: x)
         self._stack = list()
 
-    def get_line_iters(self, index):
-        start = self._buffer.get_iter_at_line(index)
-        end = self._buffer.get_iter_at_line(index + 1)
-        return start, end
-
-    @property
-    def buffer(self):
-        return self._buffer
-
-    def reflect(self):
-        self._buffer.set_text('\n'.join(str(i) for i in self._stack))
+    def __str__(self):
+        return '\n'.join(getattr(i, 'op_name', None) or str(i) for i in self._stack)
 
     def add_op(self, op):
         self._ops[op.op_name] = op
@@ -40,6 +25,9 @@ class OpStack(object):
         except KeyError:
             raise StackError('Unknown operation %s' % opname)
 
+    def has_op(self, opname):
+        return opname in self._ops
+
     def pop(self, index=0):
         """
         Pop value from stack (like get()+drop())
@@ -48,7 +36,6 @@ class OpStack(object):
             text = self._stack.pop(index)
         except IndexError:
             raise StackError('Stack is empty')
-        self.reflect()
         return text
 
     def push(self, data, index=0):
@@ -57,8 +44,7 @@ class OpStack(object):
         """
         if data is None or data == '':
             raise StackError('No empty values allowed on the stack')
-        self._stack.insert(index, data)
-        self.reflect()
+        self._stack.insert(index, self._ops.get(data, None) or self._guard(data))
 
     def get(self, index=0):
         """
@@ -72,22 +58,19 @@ class OpStack(object):
         """
         if data is None or data == '':
             raise StackError('No empty values allowed on the stack')
-        self._stack[index] = data
-        self.reflect()
+        self._stack[index] = self._ops.get(data, None) or self._guard(data)
 
     def drop(self, index):
         """
         Drop value from stack
         """
         self._stack.pop(index)
-        self.reflect()
 
     def clear(self):
         """
         Clear stack
         """
         self._stack = list()
-        self._buffer.set_text('')
 
     __getitem__ = get
 
@@ -97,18 +80,18 @@ class OpStack(object):
     def _get_push_operand_index(self):
         idx, pri = 0, 0
         for i, item in self:
-            op = self._ops.get(item, op_oper)
-            if op.op_prio > pri:
-                pri = op.op_prio
+            opri = getattr(item, 'op_prio', 100)
+            if opri > pri:
+                pri = opri
             else:
-                return i - 1 if pri == op_oper.op_prio else i
+                return i - 1 if pri == 100 else i
             idx = i
         return idx
 
     def _get_push_operator_index(self, op):
         idx, pri = 0, op.op_prio
         for i, item in self:
-            if self._ops.get(item, op_oper).op_prio >= pri:
+            if getattr(item, 'op_prio', 100) >= pri:
                 return i
             idx = i
         return idx
@@ -126,9 +109,8 @@ class OpStack(object):
 
     def pop_op(self):
         data = self.pop()
-        op = self._ops.get(data, None)
-        if op:
-            op(self)
+        if isinstance(data, function):
+            data(self)
             data = self.pop()
         return data
 
@@ -146,3 +128,4 @@ class OpStack(object):
         >>> 
         '''
         return enumerate(self._stack)
+
