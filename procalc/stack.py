@@ -9,8 +9,8 @@ class OpStack(object):
         self._guard = guard or (lambda x: x)
         self._stack = list()
 
-    def __str__(self):
-        return '\n'.join(getattr(i, 'op_name', None) or str(i) for i in self._stack)
+    def as_str(self, filter_=str):
+        return '\n'.join(getattr(i, 'op_name', None) or filter_(i) for i in self._stack)
 
     def add_op(self, op):
         self._ops[op.op_name] = op
