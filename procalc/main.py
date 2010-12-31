@@ -32,6 +32,7 @@ class ProCalcApp(hildon.Program):
         stack.set_properties(editable=False)
 
         self.w_stack = stack
+        self.w_buffer = stack.get_buffer()
         self.w_input = input
         self.w_keypad = keypad
 
@@ -71,11 +72,11 @@ class ProCalcApp(hildon.Program):
 
     def init_stack(self):
         ops = (getattr(operations, o) for o in operations.__all__)
-        self.stack = OpStack(self.w_stack.get_buffer(), *ops)
+        self.stack = OpStack(dec, *ops)
 
     def init_state(self):
         self.opmode = False
-        self.show_filter = str
+        self.filter = str
 
     def __init__(self):
         super(ProCalcApp, self).__init__()
@@ -83,20 +84,20 @@ class ProCalcApp(hildon.Program):
         # 0. set state attributes
         self.init_state()
 
-        # 1. create window
+        # 1. init stack
+        self.init_stack()
+
+        # 2. create window
         self.init_window()
 
-        # 2. init main controls
+        # 3. init main controls
         self.init_controls()
 
-        # 3. place controls into layout
+        # 4. place controls into layout
         self.init_layout()
 
-        # 4. init main menu
+        # 5. init main menu
         self.init_menu()
-
-        # 5. init stack
-        self.init_stack()
 
     def quit(self, *args):
         gtk.main_quit()
@@ -167,10 +168,6 @@ Author: Konstantin Stepanov, © 2010
     def hit_execute(self, b):
         self.stack_push_op()
         self.stack_pop_op()
-        try:
-            self.input = self.show_filter(dec(self.input))
-        except ValueError, e:
-            self.message(e.message.capitalize(), 2000)
 
     def hit_opkey(self, b):
         op = b.get_label()
@@ -232,10 +229,10 @@ Author: Konstantin Stepanov, © 2010
 
     def hit_switch_base(self, b):
         base_name = b.get_label()
-        self.show_filter = dict(Bin=bin, Oct=oct, Dec=str, Hex=hex).get(base_name, str)
+        self.filter = dict(Bin=bin, Oct=oct, Dec=str, Hex=hex).get(base_name, str)
         if not self.opmode:
             try:
-                self.input = self.show_filter(dec(self.input))
+                self.input = self.filter(dec(self.input))
             except ValueError, e:
                 self.message(e.message.capitalize(), 2000)
 
@@ -362,6 +359,7 @@ Author: Konstantin Stepanov, © 2010
     def stack_push(self):
         try:
             self.stack.push(self.input)
+            self.w_buffer.set_text(str(self.stack))
             if not self.is_func:
                 self.input = ''
         except StackError, e:
@@ -370,16 +368,18 @@ Author: Konstantin Stepanov, © 2010
     def stack_pop(self):
         try:
             data = self.stack.pop()
+            self.w_buffer.set_text(str(self.stack))
             input = self.input
             if self.is_func and input:
                 self.stack.push(input)
-            self.input = data
+            self.input = self.filter(data)
         except StackError, e:
             self.message(e.message, 2000)
 
     def stack_push_op(self):
         try:
             self.stack.push_op(self.input)
+            self.w_buffer.set_text(str(self.stack))
             self.input = ''
         except OperationError, e:
             self.message(e.message, 2000)
@@ -388,7 +388,8 @@ Author: Konstantin Stepanov, © 2010
 
     def stack_pop_op(self):
         try:
-            self.input = self.stack.pop_op()
+            self.input = self.filter(self.stack.pop_op())
+            self.w_buffer.set_text(str(self.stack))
         except (StackError, OperationError), e:
             self.message(e.message, 2000)
 
