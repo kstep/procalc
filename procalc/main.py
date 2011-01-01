@@ -7,7 +7,7 @@ from procalc import operations
 from procalc.operations import OperationError
 from procalc.stack import OpStack, StackError
 from procalc.helpers import button, switch, picker, selector, liststore, transpose_table
-from procalc.converters import bin, oct, dec, hex
+from procalc.converters import bin, oct, dec, hex, raw
 
 class ProCalcApp(hildon.Program):
 
@@ -76,7 +76,8 @@ class ProCalcApp(hildon.Program):
 
     def init_state(self):
         self.opmode = False
-        self.filter = str
+        self.rawview = False
+        self.baseconv = str
         self._ninput = None
         self._sinput = ''
 
@@ -117,7 +118,8 @@ class ProCalcApp(hildon.Program):
         # Raw - like float, but show inner binary representation
         # of floats in non-decimal modes, doesn't make sense for
         # integers as integers are always in "raw" format.
-        menu.append(picker('Format', None, 'Integer', 'Float', 'Raw'))
+        #menu.append(picker('Format', None, 'Integer', 'Float', 'Raw'))
+        menu.append(button('Raw view', self.hit_switch_raw_view, 'toggle'))
 
         # TODO
         # First number is minimal integer part length to pad to with
@@ -145,6 +147,9 @@ without any warranty.
 
 Author: Konstantin Stepanov, © 2010
                 """)
+
+    def filter(self, value):
+        return self.baseconv(raw(value) if self.rawview else value)
 
     def hit_switch_portrait(self, b):
         flags = 0
@@ -230,18 +235,26 @@ Author: Konstantin Stepanov, © 2010
     def hit_pop_stack(self, b):
         self.stack_pop()
 
-    def hit_switch_base(self, b):
-        base_name = b.get_label()
-        self.filter = dict(Bin=bin, Oct=oct, Dec=str, Hex=hex).get(base_name, str)
+    def update_view(self):
+        self.w_buffer.set_text(self.stack.as_str(self.filter))
+
         if not self.opmode:
             try:
                 self.ninput = self.ninput
-                self.w_buffer.set_text(self.stack.as_str(self.filter))
             except ValueError, e:
                 self.message(e.message.capitalize(), 2000)
 
+    def hit_switch_base(self, b):
+        base_name = b.get_label()
+        self.baseconv = dict(Bin=bin, Oct=oct, Dec=str, Hex=hex).get(base_name, str)
+        self.update_view()
+
     def hit_mode(self, b):
         pass
+
+    def hit_switch_raw_view(self, b):
+        self.rawview = b.get_active()
+        self.update_view()
 
     def hit_keyboard(self, w, ev):
         def mod_key(attr):
@@ -521,3 +534,4 @@ Author: Konstantin Stepanov, © 2010
     def run(self):
         self.window.show_all()
         gtk.main()
+
