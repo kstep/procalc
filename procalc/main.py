@@ -218,7 +218,7 @@ Author: Konstantin Stepanov, © 2010
         self.input = self.input[:-1]
 
     def hit_clear(self, b):
-        self.input = ''
+        self.ninput = None
         if self.is_func:
             self.stack.clear()
             self.w_buffer.set_text('')
@@ -393,7 +393,7 @@ Author: Konstantin Stepanov, © 2010
             self.stack.push(self.input)
             self.w_buffer.set_text(self.stack.as_str(self.filter))
             if not self.is_func:
-                self.input = ''
+                self.ninput = None
 
         except StackError, e:
             self.message(e.message, 2000)
@@ -416,7 +416,7 @@ Author: Konstantin Stepanov, © 2010
         try:
             self.stack.push_op(self.input)
             self.w_buffer.set_text(self.stack.as_str(self.filter))
-            self.input = ''
+            self.ninput = None
 
         except OperationError, e:
             self.message(e.message, 2000)
