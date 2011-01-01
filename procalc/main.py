@@ -40,7 +40,7 @@ class ProCalcApp(hildon.Program):
         panner = hildon.PannableArea()
         panner.add_with_viewport(self.w_stack)
         panner.set_properties(
-                mov_mode=hildon.MOVEMENT_MODE_VERT,
+                mov_mode=hildon.MOVEMENT_MODE_BOTH,
                 size_request_policy=hildon.SIZE_REQUEST_MINIMUM,
                 width_request=200,
                 height_request=110)
