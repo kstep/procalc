@@ -77,6 +77,8 @@ class ProCalcApp(hildon.Program):
     def init_state(self):
         self.opmode = False
         self.filter = str
+        self._ninput = None
+        self._sinput = ''
 
     def __init__(self):
         super(ProCalcApp, self).__init__()
@@ -232,7 +234,7 @@ Author: Konstantin Stepanov, © 2010
         self.filter = dict(Bin=bin, Oct=oct, Dec=str, Hex=hex).get(base_name, str)
         if not self.opmode:
             try:
-                self.input = self.filter(dec(self.input))
+                self.ninput = self.ninput
                 self.w_buffer.set_text(self.stack.as_str(self.filter))
             except ValueError, e:
                 self.message(e.message.capitalize(), 2000)
@@ -347,6 +349,34 @@ Author: Konstantin Stepanov, © 2010
 
     input = property(input, set_input)
 
+    def stack_denorm(self, value):
+        '''
+        Turn normalized value from stack into string representation
+        according to format settings.
+        '''
+        if value is None:
+            return ''
+        return getattr(value, 'op_name', None) or self.filter(value)
+
+    def ninput(self):
+        '''
+        Get normalized value from user input.
+        If user changes input value, update normalized value as well.
+        '''
+        if self._sinput != self.input:
+            self._sinput = self.input
+            self._ninput = self.stack.norm(self._sinput)
+        return self._ninput
+
+    def set_ninput(self, value):
+        '''
+        Set normalized value. This action updates user entry as well.
+        '''
+        self._sinput = self.input = self.stack_denorm(value)
+        self._ninput = value
+
+    ninput = property(ninput, set_ninput)
+
     def add_input(self, value):
         self.w_input.insert_text(value, -1)
         self.w_input.set_position(-1)
@@ -363,6 +393,7 @@ Author: Konstantin Stepanov, © 2010
             self.w_buffer.set_text(self.stack.as_str(self.filter))
             if not self.is_func:
                 self.input = ''
+
         except StackError, e:
             self.message(e.message, 2000)
 
@@ -370,10 +401,13 @@ Author: Konstantin Stepanov, © 2010
         try:
             data = self.stack.pop()
             self.w_buffer.set_text(self.stack.as_str(self.filter))
+
             input = self.input
             if self.is_func and input:
                 self.stack.push(input)
-            self.input = self.filter(data)
+
+            self.ninput = data
+
         except StackError, e:
             self.message(e.message, 2000)
 
@@ -382,15 +416,18 @@ Author: Konstantin Stepanov, © 2010
             self.stack.push_op(self.input)
             self.w_buffer.set_text(self.stack.as_str(self.filter))
             self.input = ''
+
         except OperationError, e:
             self.message(e.message, 2000)
+
         except StackError:
             pass
 
     def stack_pop_op(self):
         try:
-            self.input = self.filter(self.stack.pop_op())
+            self.ninput = self.stack.pop_op()
             self.w_buffer.set_text(self.stack.as_str(self.filter))
+
         except (StackError, OperationError), e:
             self.message(e.message, 2000)
 
