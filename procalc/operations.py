@@ -2,14 +2,13 @@
 from __future__ import division
 
 import math
-from procalc.converters import dec, fint
 
 def native(x):
     return x
 
 __all__ = [
             'op_noop', 'op_oper',  # service
-            'op_add', 'op_sub', 'op_mul', 'op_div','op_mod', 'op_pow',  # standard
+            'op_add', 'op_sub', 'op_mul', 'op_div', 'op_mod', 'op_pow',  # standard
             'op_or', 'op_xor', 'op_and', 'op_andnot', 'op_not', 'op_shl', 'op_shr',  # bitwise
             'op_sum', 'op_prod', 'op_mean', 'op_stdev'  # statistics
             ]
@@ -20,6 +19,7 @@ class OperationError(ValueError):
 def operation(name, prio, *types):
     def decorator(func):
         rtypes = tuple(reversed(types))
+
         def wrapper(stack):
             try:
                 args = list()
