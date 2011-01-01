@@ -28,6 +28,11 @@ class OpStack(object):
     def has_op(self, opname):
         return opname in self._ops
 
+    def norm(self, value):
+        if value is None or value == '':
+            raise StackError('No empty values allowed on the stack')
+        return self._ops.get(value, None) or self._guard(value)
+
     def pop(self, index=0):
         """
         Pop value from stack (like get()+drop())
@@ -42,9 +47,7 @@ class OpStack(object):
         """
         Push value into stack
         """
-        if data is None or data == '':
-            raise StackError('No empty values allowed on the stack')
-        self._stack.insert(index, self._ops.get(data, None) or self._guard(data))
+        self._stack.insert(index, self.norm(data))
 
     def get(self, index=0):
         """
@@ -56,9 +59,7 @@ class OpStack(object):
         """
         Put value into stack, stack doesn't grow
         """
-        if data is None or data == '':
-            raise StackError('No empty values allowed on the stack')
-        self._stack[index] = self._ops.get(data, None) or self._guard(data)
+        self._stack[index] = self.norm(data)
 
     def drop(self, index):
         """
