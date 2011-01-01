@@ -221,6 +221,7 @@ Author: Konstantin Stepanov, © 2010
         self.input = ''
         if self.is_func:
             self.stack.clear()
+            self.w_buffer.set_text('')
             self.is_func = False
 
     def hit_push_stack(self, b):
