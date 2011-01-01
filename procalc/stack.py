@@ -130,3 +130,5 @@ class OpStack(object):
         '''
         return enumerate(self._stack)
 
+    def __len__(self):
+        return len(self._stack)
