@@ -125,7 +125,7 @@ class ProCalcApp(hildon.Program):
         # second number is number of digits left after decimal
         # point (0 means always work with integers, -1 - no rounding
         # is applied).
-        nums = liststore(*range(-1, 11))
+        nums = liststore(*range(-1, 65))
         menu.append(picker('Precision', None, selector(nums, nums)))
 
         menu.append(button('Portrait', self.hit_switch_portrait, 'toggle'))
