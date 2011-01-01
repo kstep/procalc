@@ -104,7 +104,7 @@ def fint(x):
     4621819117588971520L
     '''
     if isinstance(x, float):
-        return struct.unpack('q', struct.pack('d', x))[0]
+        return struct.unpack('Q', struct.pack('d', x))[0]
     else:
         return int(x)
 
@@ -114,7 +114,7 @@ def intf(x):
     10.0
     '''
     if isinstance(x, (int, long)):
-        return struct.unpack('d', struct.pack('q', x))[0]
+        return struct.unpack('d', struct.pack('Q', x))[0]
     else:
         return x
 
@@ -128,7 +128,7 @@ def uint(x):
 
 def raw(x):
     if isinstance(x, float):
-        f, t = 'd', 'q'
+        f, t = 'd', 'Q'
     else:
         x = int(x)
         if x > 0:
