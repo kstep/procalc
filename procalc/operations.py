@@ -22,8 +22,9 @@ def operation(name, prio, *types):
         rtypes = tuple(reversed(types))
         def wrapper(stack):
             try:
-                args = [t(stack.pop_op()) for t in rtypes]
-                args.reverse()
+                args = list()
+                for t in rtypes:
+                    args.insert(0, t(stack.pop_op()))
             except ValueError:
                 raise OperationError("Arguments type mismatch for %s(%s)" % (name, ", ".join(map(lambda t: t.__name__, types))))
 
@@ -44,8 +45,9 @@ def operation_for_all(name, prio, type_):
     def decorator(func):
         def wrapper(stack):
             try:
-                args = [type_(item) for item in stack]
-                args.reverse()
+                args = list()
+                while stack:
+                    args.insert(0, type_(stack.pop_op()))
             except ValueError:
                 raise OperationError("Argument type mismatch for %s(%s, ...)" % (name, type_.__name__))
 
