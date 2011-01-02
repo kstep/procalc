@@ -76,6 +76,10 @@ def op_prod(*args):
 def op_mean(*args):
     return sum(args) / len(args)
 
+@operation_for_all('gμ', -3, native)
+def op_gmean(*args):
+    return pow(reduce(lambda a, b: a * b, args), 1 / len(args))
+
 @operation_for_all('σ', -3, native)
 def op_stdev(*args):
     mean = sum(args) / len(args)
