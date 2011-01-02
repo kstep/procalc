@@ -496,7 +496,7 @@ Author: Konstantin Stepanov, © 2010
         buttons_box1.attach(b, 2, 3, 4, 5)
 
         # Basic operations
-        modes = u'σμΠ−Σ'
+        modes = ('σ', 'μ', 'Π', 'gμ', 'Σ')
         for i, c in enumerate(u'↑÷×−+'):
             b = button(str(c), self.hit_opkey, 'mode')
             b.set_labels(str(c), str(modes[i]), str(c), str(modes[i]))
