@@ -33,7 +33,7 @@ def basef(frac, base, prec=10):
 
 def bin(x):
     r = ''
-    f, i = math.fmod(abs(x))
+    f, i = math.modf(abs(x))
     i = int(i)
     while i:
         r += str(i & 1)
@@ -44,7 +44,7 @@ def bin(x):
     return r + basef(f, 2)
 
 def oct(x):
-    f, i = math.fmod(abs(x))
+    f, i = math.modf(abs(x))
     r = '0o' + core.oct(int(i)).lstrip('0')
     if r == '0o':
         r += '0'
@@ -53,7 +53,7 @@ def oct(x):
     return r + basef(f, 8)
 
 def hex(x):
-    f, i = math.fmod(x)
+    f, i = math.modf(x)
     return core.hex(int(i)).upper().replace('0X', '0x') + basef(abs(f), 16)
 
 def dec(s):
