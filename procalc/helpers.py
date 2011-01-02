@@ -7,6 +7,7 @@ class ModeButton(hildon.GtkButton):
 
     def set_labels(self, *labels):
         self.__labels = labels
+        self.set_label(labels[0])
 
     def change_mode(self, app, mode):
         try:
