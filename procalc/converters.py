@@ -21,14 +21,11 @@ def bits(n):
         n >>= 1
     return c
 
-def basef(x, base=2, prec=10):
-    frac = abs(x - int(x))
+def basef(frac, base, prec=10):
     result = ''
     while frac and len(result) < prec:
-        frac *= base
-        d = int(frac)
-        frac -= d
-        result += strdig(d)
+        frac, d = math.modf(frac * base)
+        result += strdig(int(d))
 
     if result:
         result = '.' + result
@@ -36,25 +33,28 @@ def basef(x, base=2, prec=10):
 
 def bin(x):
     r = ''
-    i = abs(int(x))
+    f, i = math.fmod(abs(x))
+    i = int(i)
     while i:
         r += str(i & 1)
         i >>= 1
     r = '0b' + (r or '0')
     if i < 0:
         r = '-' + r
-    return r + basef(x, 2)
+    return r + basef(f, 2)
 
 def oct(x):
-    r = '0o' + core.oct(abs(int(x))).lstrip('0')
+    f, i = math.fmod(abs(x))
+    r = '0o' + core.oct(int(i)).lstrip('0')
     if r == '0o':
         r += '0'
     if x < 0:
         r = '-' + r
-    return r + basef(x, 8)
+    return r + basef(f, 8)
 
 def hex(x):
-    return core.hex(int(x)).upper().replace('0X', '0x') + basef(x, 16)
+    f, i = math.fmod(x)
+    return core.hex(int(i)).upper().replace('0X', '0x') + basef(abs(f), 16)
 
 def dec(s):
     '''
