@@ -205,7 +205,7 @@ Author: Konstantin Stepanov, © 2010
             if base is not None:
                 text = self.input
                 minus = text.startswith('-')
-                text = base + text.lstrip('-0bx')
+                text = base + text.lstrip('-0bxo')
                 if minus:
                     text = '-' + text
                 self.input = text
