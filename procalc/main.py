@@ -439,19 +439,20 @@ Author: Konstantin Stepanov, © 2010
             self.w_buffer.set_text(self.stack.as_str(self.filter))
             self.ninput = None
 
-        except OperationError, e:
-            self.message(e.message, 2000)
-
         except StackError:
             pass
 
     def stack_pop_op(self):
         try:
             self.ninput = self.stack.pop_op()
-            self.w_buffer.set_text(self.stack.as_str(self.filter))
+
+        except OperationError, e:
+            self.message(e.message, 2000)
 
         except (StackError, OperationError), e:
             self.message(e.message, 2000)
+
+        self.w_buffer.set_text(self.stack.as_str(self.filter))
 
     def message(self, text, timeout=500):
         banner = hildon.hildon_banner_show_information(self.window, '', text)
