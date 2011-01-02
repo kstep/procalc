@@ -154,7 +154,7 @@ Author: Konstantin Stepanov, © 2010
                 """)
 
     def filter(self, value):
-        return self.baseconv(raw(value) if self.rawview else value)
+        return self.baseconv(raw(value) if self.rawview else value).strip('()')
 
     def hit_switch_portrait(self, b):
         flags = 0
@@ -252,6 +252,12 @@ Author: Konstantin Stepanov, © 2010
 
     def hit_func(self, b):
         self.emit('mode-changed', self.is_mode + (b.get_active() and 2))
+
+    def hit_power(self, b):
+        if self.is_mode:
+            self.add_input('j')
+        else:
+            self.add_input('e')
 
     def hit_switch_raw_view(self, b):
         self.rawview = b.get_active()
@@ -531,7 +537,7 @@ Author: Konstantin Stepanov, © 2010
         self.w_func = b
         buttons_box1.attach(b, 4, 5, 0, 1)
 
-        b = button('×Bⁿ', None, 'mode')
+        b = button('×Bⁿ', self.hit_power, 'mode')
         b.set_labels('×Bⁿ', '+bj', '×Bⁿ', '+bj')
         self.connect('mode-changed', b.change_mode)
         buttons_box2.attach(b, 2, 3, 2, 3)

@@ -32,6 +32,8 @@ def basef(frac, base, prec=10):
     return result
 
 def bin(x):
+    if isinstance(x, complex):
+        return bin(x.real) + ('' if x.imag < 0 else '+') + bin(x.imag) + 'j'
     r = ''
     f, i = math.modf(abs(x))
     i = int(i)
@@ -44,6 +46,8 @@ def bin(x):
     return r + basef(f, 2)
 
 def oct(x):
+    if isinstance(x, complex):
+        return oct(x.real) + ('' if x.imag < 0 else '+') + oct(x.imag) + 'j'
     f, i = math.modf(abs(x))
     r = '0o' + core.oct(int(i)).lstrip('0')
     if r == '0o':
@@ -53,6 +57,8 @@ def oct(x):
     return r + basef(f, 8)
 
 def hex(x):
+    if isinstance(x, complex):
+        return hex(x.real) + ('' if x.imag < 0 else '+') + hex(x.imag) + 'j'
     f, i = math.modf(x)
     return core.hex(int(i)).upper().replace('0X', '0x') + basef(abs(f), 16)
 
@@ -74,10 +80,17 @@ def dec(s):
     >>> dec('0b1.01')
     1.25
     '''
-    if isinstance(s, (long, int, float)):
+    if isinstance(s, (long, int, float, complex)):
         return s
 
-    x = s.lstrip('-')
+    if 'j' in s:
+        r, n, i = s.rpartition('+')
+        if not n:
+            r, n, i = s.rpartition('-')
+        i = n + i.rstrip('j')
+        return complex(dec(r), dec(i))
+
+    x = s.lstrip('-+')
     if not x:
         return 0
 
