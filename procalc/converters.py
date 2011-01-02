@@ -85,6 +85,12 @@ def dec(s):
     bitn = bits(base - 1)
 
     if base == 10:
+        for c in 'ABCDEF':
+            if c in s:
+                base = 16
+                break
+
+    if base == 10:
         return (float if '.' in s or 'e' in s else int)(s)
     else:
         x = x.lstrip('0bxo')
