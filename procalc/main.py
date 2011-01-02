@@ -1,5 +1,6 @@
 # coding: utf-8
 
+import gobject
 import gtk
 import hildon
 
@@ -10,6 +11,10 @@ from procalc.helpers import button, switch, picker, selector, liststore, transpo
 from procalc.converters import bin, oct, dec, hex, raw
 
 class ProCalcApp(hildon.Program):
+
+    __gsignals__ = {
+            'mode-changed': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, (int,))
+            }
 
     def init_window(self):
         self.window = hildon.Window()
@@ -250,7 +255,10 @@ Author: Konstantin Stepanov, © 2010
         self.update_view()
 
     def hit_mode(self, b):
-        pass
+        self.emit('mode-changed', (self.is_func and 2) + (b.get_active()))
+
+    def hit_func(self, b):
+        self.emit('mode-changed', self.is_mode + (b.get_active() and 2))
 
     def hit_switch_raw_view(self, b):
         self.rawview = b.get_active()
@@ -488,8 +496,11 @@ Author: Konstantin Stepanov, © 2010
         buttons_box1.attach(b, 2, 3, 4, 5)
 
         # Basic operations
+        modes = u'σμΠ−Σ'
         for i, c in enumerate(u'↑÷×−+'):
-            b = button(str(c), self.hit_opkey)
+            b = button(str(c), self.hit_opkey, 'mode')
+            b.set_labels(str(c), str(modes[i]), str(c), str(modes[i]))
+            self.connect('mode-changed', b.change_mode)
             buttons_box2.attach(b, 0, 1, i, i + 1)
 
         # Stack operations
@@ -516,7 +527,7 @@ Author: Konstantin Stepanov, © 2010
         self.w_mode = b
         buttons_box1.attach(b, 3, 4, 0, 1)
 
-        b = button('Fn', None, 'toggle')
+        b = button('Fn', self.hit_func, 'toggle')
         self.w_func = b
         buttons_box1.attach(b, 4, 5, 0, 1)
 
@@ -524,7 +535,9 @@ Author: Konstantin Stepanov, © 2010
         buttons_box2.attach(b, 2, 3, 2, 3)
 
         # Edit keys
-        b = button('C', self.hit_clear)
+        b = button('C', self.hit_clear, 'mode')
+        b.set_labels('C', 'C', 'CA', 'CA')
+        self.connect('mode-changed', b.change_mode)
         buttons_box1.attach(b, 0, 1, 0, 1)
         b = button(u'←', self.hit_backspace)
         buttons_box1.attach(b, 1, 3, 0, 1)
