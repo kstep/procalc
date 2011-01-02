@@ -183,13 +183,6 @@ Author: Konstantin Stepanov, © 2010
 
     def hit_opkey(self, b):
         op = b.get_label()
-        if self.is_func:
-            op = ({
-                '÷': 'μ',
-                '↑': 'σ',
-                '×': 'Π',
-                '+': 'Σ',
-                }).get(op, op)
         self.stack_push_op()
         self.input = op
         self.opmode = True
