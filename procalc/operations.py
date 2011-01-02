@@ -10,7 +10,7 @@ __all__ = [
             'op_noop', 'op_oper',  # service
             'op_add', 'op_sub', 'op_mul', 'op_div', 'op_mod', 'op_pow',  # standard
             'op_or', 'op_xor', 'op_and', 'op_andnot', 'op_not', 'op_shl', 'op_shr',  # bitwise
-            'op_sum', 'op_prod', 'op_mean', 'op_stdev'  # statistics
+            'op_sum', 'op_prod', 'op_mean', 'op_gmean', 'op_stdev'  # statistics
             ]
 
 class OperationError(ValueError):
