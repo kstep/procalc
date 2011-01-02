@@ -73,6 +73,7 @@ class ProCalcApp(hildon.Program):
 
     def init_menu(self):
         menu_bar = self.create_menu()
+        menu_bar.show_all()
         self.window.set_app_menu(menu_bar)
 
     def init_stack(self):
@@ -137,7 +138,6 @@ class ProCalcApp(hildon.Program):
 
         menu.append(button('Portrait', self.hit_switch_portrait, 'toggle'))
         menu.append(button('About', self.show_about_info))
-        menu.show_all()
         return menu
 
     def show_about_info(self, b):
