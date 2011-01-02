@@ -3,6 +3,18 @@
 import gtk
 import hildon
 
+class ModeButton(hildon.GtkButton):
+
+    def set_labels(self, *labels):
+        self.__labels = labels
+
+    def change_mode(self, app, mode):
+        try:
+            label = self.__labels[mode]
+        except IndexError:
+            return
+        self.set_label(label)
+
 def liststore(*items):
     store = gtk.ListStore(str)
     for i in items:
@@ -60,6 +72,7 @@ def transpose_table(table):
 def button(label, onclicked=None, button_type='normal', *args):
     button_class = dict(
             normal=hildon.GtkButton,
+            mode=ModeButton,
             toggle=hildon.GtkToggleButton,
             radio=hildon.GtkRadioButton,
             check=hildon.CheckButton).get(button_type, hildon.GtkButton)
