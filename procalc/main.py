@@ -419,6 +419,9 @@ Author: Konstantin Stepanov, © 2010
         except StackError, e:
             self.message(e.message, 2000)
 
+        except ValueError, e:
+            self.message(e.message.capitalize(), 2000)
+
     def stack_pop(self):
         try:
             data = self.stack.pop()
@@ -438,6 +441,9 @@ Author: Konstantin Stepanov, © 2010
             self.stack.push_op(self.input)
             self.w_buffer.set_text(self.stack.as_str(self.filter))
             self.ninput = None
+
+        except ValueError, e:
+            self.message(e.message.capitalize(), 2000)
 
         except StackError:
             pass
