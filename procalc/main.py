@@ -538,7 +538,9 @@ Author: Konstantin Stepanov, © 2010
         self.w_func = b
         buttons_box1.attach(b, 4, 5, 0, 1)
 
-        b = button('×Bⁿ')
+        b = button('×Bⁿ', None, 'mode')
+        b.set_labels('×Bⁿ', '+bj', '×Bⁿ', '+bj')
+        self.connect('mode-changed', b.change_mode)
         buttons_box2.attach(b, 2, 3, 2, 3)
 
         # Edit keys
