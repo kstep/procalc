@@ -10,7 +10,9 @@ __all__ = [
             'op_noop', 'op_oper',  # service
             'op_add', 'op_sub', 'op_mul', 'op_div', 'op_mod', 'op_pow',  # standard
             'op_or', 'op_xor', 'op_and', 'op_andnot', 'op_not', 'op_shl', 'op_shr',  # bitwise
-            'op_sum', 'op_prod', 'op_mean', 'op_gmean', 'op_stdev'  # statistics
+            'op_sum', 'op_prod', 'op_mean', 'op_gmean', 'op_stdev',  # statistics
+            'op_sin', 'op_cos', 'op_tan', 'op_cot',  # trigonometry
+            'op_log', 'op_ln',  # logarithm
             ]
 
 class OperationError(ValueError):
@@ -145,4 +147,12 @@ def op_shr(a, b):
 @operation('<<', 2, int, int)
 def op_shl(a, b):
     return a << b if b >= 0 else a >> -b
+
+op_sin = operation('sin', 5, native)(math.sin)
+op_cos = operation('cos', 5, native)(math.cos)
+op_tan = operation('tan', 5, native)(math.tan)
+op_cot = operation('cot', 5, native)(lambda a: 1 / math.tan(a))
+
+op_log = operation('log', 5, native, int)(math.log)
+op_ln = operation('ln', 5, native)(math.log)
 
