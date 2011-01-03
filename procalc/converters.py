@@ -5,6 +5,10 @@ import math
 import struct
 import __builtin__ as core
 
+format = [0, 0]
+def set_format(a, b):
+    format[0], format[1] = int(a), int(b)
+
 def strdig(d):
     return str(d) if d < 10 else chr(d + 55)
 
@@ -21,14 +25,15 @@ def bits(n):
         n >>= 1
     return c
 
-def basef(frac, base, prec=10):
+def basef(frac, base):
     result = ''
+    prec = format[1]
     while frac and len(result) < prec:
         frac, d = math.modf(frac * base)
         result += strdig(int(d))
 
     if result:
-        result = '.' + result
+        result = '.' + result.ljust(prec, '0')
     return result
 
 def bin(x):
@@ -40,7 +45,7 @@ def bin(x):
     while i:
         r += str(i & 1)
         i >>= 1
-    r = '0b' + (r or '0')
+    r = '0b' + (r or '0').rjust(format[0], '0')
     if i < 0:
         r = '-' + r
     return r + basef(f, 2)
@@ -49,7 +54,7 @@ def oct(x):
     if isinstance(x, complex):
         return oct(x.real) + ('' if x.imag < 0 else '+') + oct(x.imag) + 'j'
     f, i = math.modf(abs(x))
-    r = '0o' + core.oct(int(i)).lstrip('0')
+    r = '0o' + core.oct(int(i)).lstrip('0').rjust(format[0], '0')
     if r == '0o':
         r += '0'
     if x < 0:
@@ -59,8 +64,8 @@ def oct(x):
 def hex(x):
     if isinstance(x, complex):
         return hex(x.real) + ('' if x.imag < 0 else '+') + hex(x.imag) + 'j'
-    f, i = math.modf(x)
-    return core.hex(int(i)).upper().replace('0X', '0x') + basef(abs(f), 16)
+    f, i = math.modf(abs(x))
+    return ('-' if x < 0 else '') + '0x' + core.hex(int(i)).lstrip('0x').upper().rjust(format[0], '0') + basef(f, 16)
 
 def dec(s):
     '''
