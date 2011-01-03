@@ -23,13 +23,13 @@ class Converter(object):
         sign = r'([+-])'
         number = r'(0x|0o|0b)?([0-9A-F]+)?(?:\.([0-9A-F]+))?(?:e([+-]?[0-9A-F]+))?'
         snumber = sign + '?' + number
-        inumber = snumber + 'j'
-        cnumber = snumber + sign + number + 'j'
+        inumber = snumber  # + 'j'
+        cnumber = snumber + sign + number  # + 'j'
 
 
-        self._renum = re.compile(snumber)
-        self._recnum = re.compile(cnumber)
-        self._reinum = re.compile(inumber)
+        self._renum = re.compile('^' + snumber + '$')
+        self._recnum = re.compile('^' + cnumber + '$')
+        self._reinum = re.compile('^' + inumber + '$')
 
         self.set_precision(-1, -1)
         self.set_raw_mode(False)
@@ -55,15 +55,19 @@ class Converter(object):
             return s
 
         def compose(sign, base, integer, fraction, exponent):
-            if not base:
-                return (float if fraction or exponent else int)(s)
-
             base = {'0x': 16, '0o': 8, '0b': 2}.get(base, 10)
             if base == 10:
                 for c in 'ABCDEF':
                     if c in s:
                         base = 16
                         break
+
+            if base == 10:
+                if fraction or exponent:
+                    n = (sign or '') + (integer or '0') + '.' + (fraction or '0') + 'e' + (exponent or '0')
+                    return float(n)
+                else:
+                    return int((sign or '') + (integer or '0'))
 
             sign = sign == '-' and -1 or 1
 
@@ -77,6 +81,7 @@ class Converter(object):
             return sign * integer
 
         if s.endswith('j'):  # complex
+            s = s.rstrip('j')
             parsed = self._recnum.match(s)
             if parsed:
                 parts = parsed.groups()
@@ -93,11 +98,6 @@ class Converter(object):
             return compose(*parsed.groups())
 
     def format(self, x):
-        if x < 0:
-            prefix = '-' + self._prefix
-        else:
-            prefix = self._prefix
-
         if self._raw_mode:
             x = self.raw(x)
 
@@ -105,10 +105,13 @@ class Converter(object):
             number = self._converter(abs(n)).lstrip('0bxo') or '0'
             if self._precision[0] > -1:
                 number = number.rjust(self._precision[0], '0')
-            return prefix + number
+            number = self._prefix + number
+            if n < 0:
+                number = '-' + number
+            return number
 
         def format_fraction(n):
-            number = self._format_fraction(n)
+            number = self._format_fraction(abs(n))
             if self._precision[1] > -1:
                 number = number.ljust(self._precision[1] + 1, '0')
             return number
@@ -118,14 +121,17 @@ class Converter(object):
 
         elif isinstance(x, float):
             fraction, integer = math.modf(x)
-            return format_integer(int(integer)) + format_fraction(abs(fraction))
+            return format_integer(int(integer)) + format_fraction(fraction)
 
         elif isinstance(x, complex):
             real = self.format(x.real)
             if x.imag == 0:
                 return real
 
-            imag = self.format(x.imag)
+            imag = self.format(x.imag) + 'j'
+            if x.real == 0:
+                return imag
+
             if x.imag > 0:
                 imag = '+' + imag
 
