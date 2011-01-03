@@ -59,6 +59,12 @@ class Converter(object):
                 return (float if fraction or exponent else int)(s)
 
             base = {'0x': 16, '0o': 8, '0b': 2}.get(base, 10)
+            if base == 10:
+                for c in 'ABCDEF':
+                    if c in s:
+                        base = 16
+                        break
+
             sign = sign == '-' and -1 or 1
 
             integer = int(integer or '0', base)
