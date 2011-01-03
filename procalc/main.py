@@ -9,6 +9,7 @@ from procalc.operations import OperationError
 from procalc.stack import OpStack, StackError
 from procalc.helpers import button, switch, picker, selector, liststore, transpose_table
 from procalc.converters import bin, oct, dec, hex, raw
+import procalc.converters as conv
 
 class ProCalcApp(hildon.Program):
 
@@ -134,7 +135,7 @@ class ProCalcApp(hildon.Program):
         # point (0 means always work with integers, -1 - no rounding
         # is applied).
         nums = liststore(*range(-1, 65))
-        menu.append(picker('Precision', None, selector(nums, nums)))
+        menu.append(picker('Precision', self.hit_change_precision, selector(nums, nums)))
 
         menu.append(button('Portrait', self.hit_switch_portrait, 'toggle'))
         menu.append(button('About', self.show_about_info))
@@ -155,6 +156,10 @@ Author: Konstantin Stepanov, © 2010
 
     def filter(self, value):
         return self.baseconv(raw(value) if self.rawview else value).strip('()')
+
+    def hit_change_precision(self, b):
+        conv.set_format(*b.get_value().split(':'))
+        self.update_view()
 
     def hit_switch_portrait(self, b):
         flags = 0
