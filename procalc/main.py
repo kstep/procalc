@@ -8,8 +8,7 @@ from procalc import operations
 from procalc.operations import OperationError
 from procalc.stack import OpStack, StackError
 from procalc.helpers import button, switch, picker, selector, liststore, transpose_table
-from procalc.converters import bin, oct, dec, hex, raw
-import procalc.converters as conv
+from procalc.converters import Converter
 
 class ProCalcApp(hildon.Program):
 
@@ -79,12 +78,11 @@ class ProCalcApp(hildon.Program):
 
     def init_stack(self):
         ops = (getattr(operations, o) for o in operations.__all__)
-        self.stack = OpStack(dec, *ops)
+        self.stack = OpStack(self._conv.parse, *ops)
 
     def init_state(self):
+        self._conv = Converter()
         self.opmode = False
-        self.rawview = False
-        self.baseconv = str
         self._ninput = None
         self._sinput = ''
 
@@ -155,10 +153,10 @@ Author: Konstantin Stepanov, © 2010
                 """)
 
     def filter(self, value):
-        return self.baseconv(raw(value) if self.rawview else value).strip('()')
+        return self._conv.format(value)
 
     def hit_change_precision(self, b):
-        conv.set_format(*b.get_value().split(':'))
+        self._conv.set_precision(*b.get_value().split(':'))
         self.update_view()
 
     def hit_switch_portrait(self, b):
@@ -249,7 +247,7 @@ Author: Konstantin Stepanov, © 2010
 
     def hit_switch_base(self, b):
         base_name = b.get_label()
-        self.baseconv = dict(Bin=bin, Oct=oct, Dec=str, Hex=hex).get(base_name, str)
+        self._conv.set_base(dict(Bin=2, Oct=8, Dec=10, Hex=16).get(base_name, 10))
         self.update_view()
 
     def hit_mode(self, b):
@@ -265,7 +263,7 @@ Author: Konstantin Stepanov, © 2010
             self.add_input('e')
 
     def hit_switch_raw_view(self, b):
-        self.rawview = b.get_active()
+        self._conv.set_raw_mode(b.get_active())
         self.update_view()
 
     def hit_keyboard(self, w, ev):

@@ -4,13 +4,159 @@ from __future__ import division
 import math
 import struct
 import __builtin__ as core
-
-format = [0, 0]
-def set_format(a, b):
-    format[0], format[1] = int(a), int(b)
+import re
 
 def strdig(d):
     return str(d) if d < 10 else chr(d + 55)
+
+class IntComplex(complex):
+    def __init__(self, real, imag):
+        self.real = int(real)
+        self.imag = int(imag)
+
+    def __str__(self):
+        return "(%d%+dj)" % (self.real, self.imag)
+
+class Converter(object):
+
+    def __init__(self):
+        sign = r'([+-])'
+        number = r'(0x|0o|0b)?([0-9A-F]+)?(?:\.([0-9A-F]+))?(?:e([+-]?[0-9A-F]+))?'
+        snumber = sign + '?' + number
+        inumber = snumber + 'j'
+        cnumber = snumber + sign + number + 'j'
+
+
+        self._renum = re.compile(snumber)
+        self._recnum = re.compile(cnumber)
+        self._reinum = re.compile(inumber)
+
+        self.set_precision(-1, -1)
+        self.set_raw_mode(False)
+        self.set_base(10)
+
+    def set_precision(self, integer, fraction):
+        self._precision = (int(integer), int(fraction))
+
+    def set_raw_mode(self, value):
+        self._raw_mode = bool(value)
+
+    def set_base(self, base):
+        self._prefix = {2: '0b', 8: '0o', 10: '', 16: '0x'}.get(base)
+        self._converter = {2: bin, 8: oct, 10: str, 16: hex}.get(base)
+        self._base = base
+
+    def parse(self, s):
+        '''
+        Parts:
+        sign, base, integer, fraction, exponent
+        '''
+        if isinstance(s, (int, long, float, complex)):
+            return s
+
+        def compose(sign, base, integer, fraction, exponent):
+            if not base:
+                return (float if fraction or exponent else int)(s)
+
+            base = {'0x': 16, '0o': 8, '0b': 2}.get(base, 10)
+            sign = sign == '-' and -1 or 1
+
+            integer = int(integer or '0', base)
+            if fraction:
+                integer += sum(int(a, base) / base ** i for i, a in enumerate(fraction))
+
+            if exponent:
+                integer *= base ** exponent
+
+            return sign * integer
+
+        if s.endswith('j'):  # complex
+            parsed = self._recnum.match(s)
+            if parsed:
+                parts = parsed.groups()
+                real = compose(*parts[0:5])
+                imag = compose(*parts[5:10])
+            else:
+                parsed = self._reinum.match(s)
+                real = 0
+                imag = compose(*parsed.groups())
+            return complex(real, imag)
+
+        else:  # real
+            parsed = self._renum.match(s)
+            return compose(*parsed.groups())
+
+    def format(self, x):
+        if x < 0:
+            prefix = '-' + self._prefix
+        else:
+            prefix = self._prefix
+
+        if self._raw_mode:
+            x = self.raw(x)
+
+        def format_integer(n):
+            number = self._converter(abs(n)).lstrip('0bxo') or '0'
+            if self._precision[0] > -1:
+                number = number.rjust(self._precision[0], '0')
+            return prefix + number
+
+        def format_fraction(n):
+            number = self._format_fraction(n)
+            if self._precision[1] > -1:
+                number = number.ljust(self._precision[1] + 1, '0')
+            return number
+
+        if isinstance(x, (int, long)):
+            return format_integer(x)
+
+        elif isinstance(x, float):
+            fraction, integer = math.modf(x)
+            return format_integer(int(integer)) + format_fraction(abs(fraction))
+
+        elif isinstance(x, complex):
+            real = self.format(x.real)
+            if x.imag == 0:
+                return real
+
+            imag = self.format(x.imag)
+            if x.imag > 0:
+                imag = '+' + imag
+
+            return real + imag
+
+    def _format_fraction(self, x):
+        result = ''
+        prec = self._precision[1]
+        if prec < 0:
+            prec = 1000
+        base = self._base
+
+        while x and len(result) < prec:
+            x, d = math.modf(x * base)
+            result += strdig(int(d))
+
+        if result:
+            result = '.' + result
+        return result
+
+    def repack(self, x, f, t):
+        return struct.unpack(t, struct.pack(f, x))[0]
+
+    def raw(self, x):
+        if isinstance(x, float):
+            f, t = 'd', 'Q'
+
+        elif isinstance(x, (int, long)):
+            if x > 0:
+                return x
+            f, t = 'q', 'Q'
+
+        elif isinstance(x, complex):
+            return IntComplex(self.raw(x.real), self.raw(x.imag))
+
+        return self.repack(x, f, t)
+
 
 def bits(n):
     '''
@@ -25,102 +171,15 @@ def bits(n):
         n >>= 1
     return c
 
-def basef(frac, base):
-    result = ''
-    prec = format[1]
-    while frac and len(result) < prec:
-        frac, d = math.modf(frac * base)
-        result += strdig(int(d))
-
-    if result:
-        result = '.' + result.ljust(prec, '0')
-    return result
-
-def bin(x):
-    if isinstance(x, complex):
-        return bin(x.real) + ('' if x.imag < 0 else '+') + bin(x.imag) + 'j'
+def bin(i):
     r = ''
-    f, i = math.modf(abs(x))
-    i = int(i)
     while i:
         r += str(i & 1)
         i >>= 1
-    r = '0b' + (r or '0').rjust(format[0], '0')
+    r = '0b' + (r or '0')
     if i < 0:
         r = '-' + r
-    return r + basef(f, 2)
-
-def oct(x):
-    if isinstance(x, complex):
-        return oct(x.real) + ('' if x.imag < 0 else '+') + oct(x.imag) + 'j'
-    f, i = math.modf(abs(x))
-    r = '0o' + core.oct(int(i)).lstrip('0').rjust(format[0], '0')
-    if r == '0o':
-        r += '0'
-    if x < 0:
-        r = '-' + r
-    return r + basef(f, 8)
-
-def hex(x):
-    if isinstance(x, complex):
-        return hex(x.real) + ('' if x.imag < 0 else '+') + hex(x.imag) + 'j'
-    f, i = math.modf(abs(x))
-    return ('-' if x < 0 else '') + '0x' + core.hex(int(i)).lstrip('0x').upper().rjust(format[0], '0') + basef(f, 16)
-
-def dec(s):
-    '''
-    Convert from string number representation of some base to decimal floating point.
-    >>> dec("0xAA"), dec("0o100"), dec("0b101")
-    (170, 64, 5)
-    >>> dec("0b123")
-    Traceback (most recent call last):
-        ...
-    ValueError: invalid literal for int() with base 2: '123'
-    >>> dec("0o108")
-    Traceback (most recent call last):
-        ...
-    ValueError: invalid literal for int() with base 8: '108'
-    >>> dec(hex(123)), dec(oct(123)), dec(bin(123))
-    (123, 123, 123)
-    >>> dec('0b1.01')
-    1.25
-    '''
-    if isinstance(s, (long, int, float, complex)):
-        return s
-
-    if 'j' in s:
-        r, n, i = s.rpartition('+')
-        if not n:
-            r, n, i = s.rpartition('-')
-        i = n + i.rstrip('j')
-        return complex(dec(r), dec(i))
-
-    x = s.lstrip('-+')
-    if not x:
-        return 0
-
-    base = ({'0x': 16, '0o': 8, '0b': 2}).get(x[0:2], 10)
-    bitn = bits(base - 1)
-
-    if base == 10:
-        for c in 'ABCDEF':
-            if c in s:
-                base = 16
-                break
-
-    if base == 10:
-        return (float if '.' in s or 'e' in s else int)(s)
-    else:
-        x = x.lstrip('0bxo')
-        i, _, e = x.partition('e')
-        i, _, f = i.partition('.')
-        r = int(i or '0', base)
-        if f:
-            r += sum(int(n, base) / (base << bitn * m) for m, n in enumerate(f))
-        if e:
-            r = float(r * base ** int(e))
-
-    return -r if s.startswith('-') else r
+    return r
 
 def fint(x):
     '''
@@ -149,14 +208,4 @@ def sint(x):
 
 def uint(x):
     return struct.unpack('Q', struct.pack('q', int(x)))[0]
-
-def raw(x):
-    if isinstance(x, float):
-        f, t = 'd', 'Q'
-    else:
-        x = int(x)
-        if x > 0:
-            return x
-        f, t = 'q', 'Q'
-    return struct.unpack(t, struct.pack(f, x))[0]
 
