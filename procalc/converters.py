@@ -148,7 +148,7 @@ class Converter(object):
             x, d = math.modf(x * base)
             result += strdig(int(d))
 
-        return '.' + result
+        return '.' + (result or '0')
 
     def repack(self, x, f, t):
         return struct.unpack(t, struct.pack(f, x))[0]
