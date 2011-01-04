@@ -102,7 +102,7 @@ class Converter(object):
             x = self.raw(x)
 
         def format_integer(n):
-            number = self._converter(abs(n)).lstrip('0bxo') or '0'
+            number = self._converter(abs(n)).lstrip('0bxo').upper() or '0'
             if self._precision[0] > -1:
                 number = number.rjust(self._precision[0], '0')
             number = self._prefix + number
