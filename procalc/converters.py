@@ -73,7 +73,7 @@ class Converter(object):
 
             integer = int(integer or '0', base)
             if fraction:
-                integer += sum(int(a, base) / base ** i for i, a in enumerate(fraction))
+                integer += sum(int(a, base) / base ** (i + 1) for i, a in enumerate(fraction))
 
             if exponent:
                 integer *= base ** exponent
@@ -148,9 +148,7 @@ class Converter(object):
             x, d = math.modf(x * base)
             result += strdig(int(d))
 
-        if result:
-            result = '.' + result
-        return result
+        return '.' + result
 
     def repack(self, x, f, t):
         return struct.unpack(t, struct.pack(f, x))[0]
