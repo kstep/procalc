@@ -76,7 +76,7 @@ class Converter(object):
                 integer += sum(int(a, base) / base ** (i + 1) for i, a in enumerate(fraction))
 
             if exponent:
-                integer *= base ** exponent
+                integer *= base ** int(exponent, base)
 
             return sign * integer
 
