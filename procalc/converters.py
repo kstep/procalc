@@ -23,8 +23,8 @@ class Converter(object):
         sign = r'([+-])'
         number = r'(0x|0o|0b)?([0-9A-F]+)?(?:\.([0-9A-F]+))?(?:e([+-]?[0-9A-F]+))?'
         snumber = sign + '?' + number
-        inumber = snumber  # + 'j'
-        cnumber = snumber + sign + number  # + 'j'
+        inumber = snumber + 'j'
+        cnumber = snumber + sign + number + 'j'
 
 
         self._renum = re.compile('^' + snumber + '$')
@@ -81,7 +81,6 @@ class Converter(object):
             return sign * integer
 
         if s.endswith('j'):  # complex
-            s = s.rstrip('j')
             parsed = self._recnum.match(s)
             if parsed:
                 parts = parsed.groups()
@@ -121,6 +120,8 @@ class Converter(object):
 
         elif isinstance(x, float):
             fraction, integer = math.modf(x)
+            if not fraction:
+                return format_integer(int(integer))
             return format_integer(int(integer)) + format_fraction(fraction)
 
         elif isinstance(x, complex):
