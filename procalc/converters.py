@@ -185,7 +185,7 @@ def bits(n):
 def bin(i):
     r = ''
     while i:
-        r += str(i & 1)
+        r = str(i & 1) + r
         i >>= 1
     r = '0b' + (r or '0')
     if i < 0:
