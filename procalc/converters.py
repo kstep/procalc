@@ -24,19 +24,22 @@ class Converter(object):
 
     def __init__(self):
         sign = r'([+-])'
-        number = r'(0x|0o|0b)?([0-9A-F]+)?(?:\.([0-9A-F]+))?(?:e([+-]?[0-9A-F]+))?'
+        number = r'(0x|0o|0b)?([0-9A-F]+)?(?:\.([0-9A-F]+))?(?:([pe])([+-]?[0-9A-F]+))?'
         snumber = sign + '?' + number
         inumber = snumber + 'j'
         cnumber = snumber + sign + number + 'j'
-
 
         self._renum = re.compile('^' + snumber + '$')
         self._recnum = re.compile('^' + cnumber + '$')
         self._reinum = re.compile('^' + inumber + '$')
 
+        self._precision = (-1, -1)
+        self._base = 10
+        self._mode = 0
+
         self.set_precision(-1, -1)
-        self.set_mode(0)
         self.set_base(10)
+        self.set_mode(0)
 
     def set_precision(self, integ, fract):
         integ, fract = int(integ), int(fract)
@@ -50,15 +53,23 @@ class Converter(object):
         '''
         0 - normal,
         1 - raw,
-        2 - binary exp,
-        3 - base exp.
+        2 - base exp,
+        3 - binary exp.
         '''
+        mode = int(mode)
+        self._mode = mode
         self._exponent_pipe = [
                 lambda n: (n, 0),
                 lambda n: (raw(n), 0),
                 self.split_exponent,
-                math.frexp
-                ][int(mode)]
+                lambda n: self.split_exponent(*math.frexp(n))
+                ][mode]
+        if mode == 3:
+            self._exp_delim = 'p'
+            self._exp_base = 2
+        else:
+            self._exp_delim = 'e'
+            self._exp_base = self._base
 
     def set_base(self, base):
         self._prefix = {2: '0b', 8: '0o', 10: '', 16: '0x'}.get(base)
@@ -70,6 +81,9 @@ class Converter(object):
                 }.get(int(base))
         self._base = base
         self._bits = nbits(base - 1)
+        if self._mode != 3:
+            self._exp_base = base
+            self._exp_delim = 'e'
 
     def parse(self, s):
         '''
@@ -79,7 +93,7 @@ class Converter(object):
         if isinstance(s, (int, long, float, complex)):
             return s
 
-        def compose(sign, base, integer, fraction, exponent):
+        def compose(sign, base, integer, fraction, expbase, exponent):
             base = {'0x': 16, '0o': 8, '0b': 2}.get(base, 10)
             if base == 10:
                 for c in 'ABCDEF':
@@ -87,12 +101,15 @@ class Converter(object):
                         base = 16
                         break
 
+            expbase = expbase == 'p' and 2 or base
+
             if base == 10:
-                if fraction or exponent:
-                    n = (sign or '') + (integer or '0') + '.' + (fraction or '0') + 'e' + (exponent or '0')
-                    return float(n)
+                b = expbase ** int(exponent or '0', base)
+                if fraction:
+                    n = (sign or '') + (integer or '0') + '.' + (fraction or '0')
+                    return float(n) * b
                 else:
-                    return int((sign or '') + (integer or '0'))
+                    return int((sign or '') + (integer or '0')) * b
 
             sign = sign == '-' and -1 or 1
 
@@ -101,7 +118,7 @@ class Converter(object):
                 integer += sum(int(a, base) / base ** (i + 1) for i, a in enumerate(fraction))
 
             if exponent:
-                integer *= base ** int(exponent, base)
+                integer *= expbase ** int(exponent, base)
 
             return sign * integer
 
@@ -109,8 +126,8 @@ class Converter(object):
             parsed = self._recnum.match(s)
             if parsed:
                 parts = parsed.groups()
-                real = compose(*parts[0:5])
-                imag = compose(*parts[5:10])
+                real = compose(*parts[0:6])
+                imag = compose(*parts[6:12])
             else:
                 parsed = self._reinum.match(s)
                 real = 0
@@ -127,7 +144,7 @@ class Converter(object):
 
         number, exponent = self._exponent_pipe(x)
         if exponent:
-            exponent = 'e' + self._convert_pipe(exponent)
+            exponent = self._exp_delim + self._convert_pipe(exponent)
         else:
             exponent = ''
 
@@ -173,9 +190,11 @@ class Converter(object):
 
         return self.repack(x, f, t)
 
-    def split_exponent(self, x):
-        power = int(math.log(x, self._base)) + 1 - self._precision[0]
-        return x / self._base ** power, power
+    def split_exponent(self, x, p=0):
+        power = int(math.log(x, self._exp_base)) - abs(self._precision[0])
+        if power > 0:
+            power += 1
+        return x / self._exp_base ** power, p + power
 
 def nbits(n):
     '''
