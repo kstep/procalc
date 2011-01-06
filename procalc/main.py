@@ -124,7 +124,7 @@ class ProCalcApp(hildon.Program):
         # of floats in non-decimal modes, doesn't make sense for
         # integers as integers are always in "raw" format.
         #menu.append(picker('Format', None, 'Integer', 'Float', 'Raw'))
-        menu.append(button('Raw view', self.hit_switch_raw_view, 'toggle'))
+        menu.append(picker('View mode', self.hit_change_view, 'Normal', 'Raw', 'Base exp', 'Binary exp'))
 
         # TODO
         # First number is minimal integer part length to pad to with
@@ -262,8 +262,8 @@ Author: Konstantin Stepanov, © 2010
         else:
             self.add_input('e')
 
-    def hit_switch_raw_view(self, b):
-        self._conv.set_raw_mode(b.get_active())
+    def hit_change_view(self, b):
+        self._conv.set_mode(['Normal', 'Raw', 'Base exp', 'Binary exp'].index(b.get_value()))
         self.update_view()
 
     def hit_keyboard(self, w, ev):
