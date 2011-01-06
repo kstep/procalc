@@ -9,6 +9,9 @@ import re
 def strdig(d):
     return str(d) if d < 10 else chr(d + 55)
 
+def noop(n):
+    return n
+
 class IntComplex(complex):
     def __init__(self, real, imag):
         self.real = int(real)
@@ -32,19 +35,41 @@ class Converter(object):
         self._reinum = re.compile('^' + inumber + '$')
 
         self.set_precision(-1, -1)
-        self.set_raw_mode(False)
+        self.set_mode(0)
         self.set_base(10)
 
-    def set_precision(self, integer, fraction):
-        self._precision = (int(integer), int(fraction))
+    def set_precision(self, integ, fract):
+        integ, fract = int(integ), int(fract)
+        self._precision = (integ, fract)
+        self._adjust_pipe = (
+                noop if integ < 1 else lambda n: n.lstrip('0').rjust(integ, '0'),
+                noop if fract < 1 else lambda n: n.rstrip('0').ljust(fract, '0')
+                )
 
-    def set_raw_mode(self, value):
-        self._raw_mode = bool(value)
+    def set_mode(self, mode):
+        '''
+        0 - normal,
+        1 - raw,
+        2 - binary exp,
+        3 - base exp.
+        '''
+        self._exponent_pipe = [
+                lambda n: (n, 0),
+                lambda n: (raw(n), 0),
+                self.split_exponent,
+                math.frexp
+                ][int(mode)]
 
     def set_base(self, base):
         self._prefix = {2: '0b', 8: '0o', 10: '', 16: '0x'}.get(base)
-        self._converter = {2: bin, 8: oct, 10: str, 16: hex}.get(base)
+        self._convert_pipe = {
+                2: lambda n: bin(n).lstrip('0b').rstrip('L'),
+                8: lambda n: oct(n).lstrip('0').rstrip('L'),
+                10: lambda n: str(n).rstrip('L'),
+                16: lambda n: hex(n).lstrip('0x').rstrip('L').upper()
+                }.get(int(base))
         self._base = base
+        self._bits = nbits(base - 1)
 
     def parse(self, s):
         '''
@@ -97,59 +122,39 @@ class Converter(object):
             return compose(*parsed.groups())
 
     def format(self, x):
-        if self._raw_mode:
-            x = self.raw(x)
+        if isinstance(x, complex):
+            return self.format(x.real) + ('-' if x.imag < 0 else '') + self.format(x.imag) + 'j'
 
-        def format_integer(n):
-            number = self._converter(abs(n)).lstrip('0bxo').upper() or '0'
-            if self._precision[0] > -1:
-                number = number.rjust(self._precision[0], '0')
-            number = self._prefix + number
-            if n < 0:
-                number = '-' + number
-            return number
+        number, exponent = self._exponent_pipe(x)
+        if exponent:
+            exponent = 'e' + self._convert_pipe(exponent)
+        else:
+            exponent = ''
 
-        def format_fraction(n):
-            number = self._format_fraction(abs(n))
-            if self._precision[1] > -1:
-                number = number.ljust(self._precision[1] + 1, '0')
-            return number
+        if isinstance(number, (int, long)):
+            return self.format_integer(number) + exponent
 
-        if isinstance(x, (int, long)):
-            return format_integer(x)
+        elif isinstance(number, float):
+            return self.format_float(number) + exponent
 
-        elif isinstance(x, float):
-            fraction, integer = math.modf(x)
-            if not fraction:
-                return format_integer(int(integer))
-            return format_integer(int(integer)) + format_fraction(fraction)
+        else:
+            raise ValueError('Expected int, long, float or complex, got %s' % type(x).__name__)
 
-        elif isinstance(x, complex):
-            real = self.format(x.real)
-            if x.imag == 0:
-                return real
+    def format_integer(self, x):
+        return (x < 0 and '-' or '') + self._prefix + (self._adjust_pipe[0](self._convert_pipe(abs(x))) or '0')
 
-            imag = self.format(x.imag) + 'j'
-            if x.real == 0:
-                return imag
+    def format_float(self, x):
+        fraction, integer = math.modf(x)
+        if self._base == 10:
+            fraction = str(fraction)[2:]
 
-            if x.imag > 0:
-                imag = '+' + imag
+        else:
+            align = self._base == 8 and 54 or 52
+            fraction = int(abs(fraction) * 2 ** align)
+            fraction = self._convert_pipe(fraction).rjust(align // self._bits, '0').rstrip('0')
 
-            return real + imag
-
-    def _format_fraction(self, x):
-        result = ''
-        prec = self._precision[1]
-        if prec < 0:
-            prec = 1000
-        base = self._base
-
-        while x and len(result) < prec:
-            x, d = math.modf(x * base)
-            result += strdig(int(d))
-
-        return '.' + (result or '0')
+        fraction = self._adjust_pipe[1](fraction) or '0'
+        return self.format_integer(int(integer)) + '.' + fraction
 
     def repack(self, x, f, t):
         return struct.unpack(t, struct.pack(f, x))[0]
@@ -168,8 +173,12 @@ class Converter(object):
 
         return self.repack(x, f, t)
 
+    def split_exponent(self, x):
+        power = int(math.ceil(math.log(x, self._base))) - self._precision[0]
+        return x / self._base ** power, power
 
-def bits(n):
+
+def nbits(n):
     '''
     Get number of bits in integer number.
 
