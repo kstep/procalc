@@ -174,9 +174,8 @@ class Converter(object):
         return self.repack(x, f, t)
 
     def split_exponent(self, x):
-        power = int(math.ceil(math.log(x, self._base))) - self._precision[0]
+        power = int(math.log(x, self._base)) + 1 - self._precision[0]
         return x / self._base ** power, power
-
 
 def nbits(n):
     '''
