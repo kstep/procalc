@@ -3,20 +3,25 @@ from __future__ import division
 
 import math
 
+OP_PRIO_MIN = -100
+OP_PRIO_MAX = 100
+OP_PRIO_DEF = 0
+
+__ops__ = []
+
 def native(x):
     return x
 
-__all__ = [
-            'op_noop', 'op_oper',  # service
-            'op_add', 'op_sub', 'op_mul', 'op_div', 'op_mod', 'op_pow',  # standard
-            'op_or', 'op_xor', 'op_and', 'op_andnot', 'op_not', 'op_shl', 'op_shr',  # bitwise
-            'op_sum', 'op_prod', 'op_mean', 'op_gmean', 'op_stdev',  # statistics
-            'op_sin', 'op_cos', 'op_tan', 'op_cot',  # trigonometry
-            'op_log', 'op_ln',  # logarithm
-            ]
-
 class OperationError(ValueError):
     pass
+
+def operation_on_stack(name, prio):
+    def decorator(func):
+        func.op_name = str(name)
+        func.op_prio = int(prio)
+        __ops__.append(func)
+        return func
+    return decorator
 
 def operation(name, prio, *types):
     def decorator(func):
@@ -38,18 +43,25 @@ def operation(name, prio, *types):
                     stack.push(r)
             else:
                 stack.push(result)
-        wrapper.op_name = name
-        wrapper.op_prio = prio
+
+        wrapper.op_name = str(name)
+        wrapper.op_prio = int(prio)
+        wrapper.__name__ = func.__name__
+        wrapper.__doc__ = func.__doc__
+        __ops__.append(wrapper)
         return wrapper
     return decorator
 
-def operation_for_all(name, prio, type_):
+def operation_for_list(name, prio, type_):
     def decorator(func):
         def wrapper(stack):
             try:
                 args = list()
                 while stack:
-                    args.insert(0, type_(stack.pop_op()))
+                    item = stack.pop_op()
+                    if item is op_start_of_list:
+                        break
+                    args.insert(0, type_(item))
             except ValueError:
                 raise OperationError("Argument type mismatch for %s(%s, ...)" % (name, type_.__name__))
 
@@ -61,40 +73,51 @@ def operation_for_all(name, prio, type_):
                     stack.push(r)
             else:
                 stack.push(result)
-        wrapper.op_name = name
-        wrapper.op_prio = prio
+
+        wrapper.op_name = str(name)
+        wrapper.op_prio = int(prio)
+        wrapper.__name__ = func.__name__
+        wrapper.__doc__ = func.__doc__
+        __ops__.append(wrapper)
         return wrapper
     return decorator
 
-@operation_for_all('Σ', -2, native)
+
+@operation_on_stack('', OP_PRIO_MIN)
+def op_start_of_list(stack):
+    pass
+
+@operation_on_stack('', OP_PRIO_DEF)
+def op_noop(stack):
+    pass
+
+@operation_on_stack('', OP_PRIO_MAX)
+def op_operand(stack):
+    pass
+
+
+@operation_for_list('Σ', -2, native)
 def op_sum(*args):
     return sum(args)
 
-@operation_for_all('Π', -1, native)
+@operation_for_list('Π', -1, native)
 def op_prod(*args):
     return reduce(lambda x, y: x * y, args, 1)
 
-@operation_for_all('μ', -3, native)
+@operation_for_list('μ', -3, native)
 def op_mean(*args):
     return sum(args) / len(args)
 
-@operation_for_all('gμ', -3, native)
+@operation_for_list('gμ', -3, native)
 def op_gmean(*args):
     return pow(reduce(lambda a, b: a * b, args), 1 / len(args))
 
-@operation_for_all('σ', -3, native)
+@operation_for_list('σ', -3, native)
 def op_stdev(*args):
     mean = sum(args) / len(args)
     disp = sum((x - mean) ** 2 for x in args) / len(args)
     return math.sqrt(disp)
 
-@operation('', 0)
-def op_noop():
-    pass
-
-@operation('', 100)
-def op_oper():
-    pass
 
 @operation('+', 1, native, native)
 def op_add(a, b):

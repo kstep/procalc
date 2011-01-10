@@ -77,8 +77,7 @@ class ProCalcApp(hildon.Program):
         self.window.set_app_menu(menu_bar)
 
     def init_stack(self):
-        ops = (getattr(operations, o) for o in operations.__all__)
-        self.stack = OpStack(self._conv.parse, *ops)
+        self.stack = OpStack(self._conv.parse, *operations.__ops__)
 
     def init_state(self):
         self._conv = Converter()
