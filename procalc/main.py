@@ -109,7 +109,6 @@ class ProCalcApp(hildon.Program):
         self._config = Config()
         self._config.load()
 
-        self.orientation_mode = self._config['orientation']
         self._conv.set_precision(*self._config['precision'].split(':'))
         self._conv.set_mode(self._config['view_mode'])
         self._conv.set_base(self._config['base'])
@@ -622,5 +621,6 @@ Author: Konstantin Stepanov, © 2010
 
     def run(self):
         self.window.show_all()
+        self.orientation_mode = self._config['orientation']
         gtk.main()
 
