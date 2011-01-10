@@ -61,7 +61,7 @@ def format_func2(lng, dec, base):
     char, pfx, func = format_char.get(base)
     format = '%%s%s%%0%d%s.%%-0%ds' % (pfx, lng, char, dec)
     if func:
-        return lambda a, b, c: (format % ('-' if a < 0 else '', func(abs(a)), fbconv(func(b), base))).replace(' ', '0')
+        return lambda a, b, c: (format % ('-' if a < 0 else '', func(abs(a)), fbconv(b, base))).replace(' ', '0')
     else:
         return lambda a, b, c: (format % ('-' if a < 0 else '', abs(a), fbconv(b, base))).replace(' ', '0')
 
@@ -69,7 +69,7 @@ def format_func3(lng, dec, base):
     char, pfx, func = format_char.get(base)
     format = '%%s%s%%0%d%s.%%-0%dse%%%s' % (pfx, lng, char, dec, char)
     if func:
-        return lambda a, b, c: (format % ('-' if a < 0 else '', func(abs(a)), fbconv(func(b), base)), func(c)).replace(' ', '0')
+        return lambda a, b, c: (format % ('-' if a < 0 else '', func(abs(a)), fbconv(b, base)), func(c)).replace(' ', '0')
     else:
         return lambda a, b, c: (format % ('-' if a < 0 else '', abs(a), fbconv(b, base), c)).replace(' ', '0')
 
@@ -90,6 +90,10 @@ def splitn2(x, lng, dec, base):
     frac, intg = math.modf(x)
     return intg, abs(frac), 0
 
+def fround(x, dec, base):
+    p = base ** dec
+    return round(x * p) / p
+
 mode_func = [
         [(splitn1, format_func1), (splitn2, format_func2)],
         [(splitraw, format_func1), (splitraw, format_func1)],
@@ -103,7 +107,15 @@ def format_func(mode, lng, dec, base):
     format_int = _int[1](lng, dec, base)
     int_func = lambda x: format_int(*split_int(x, lng, dec, base))
 
-    split_float = _float[0]
+    if dec > -1:
+        def dummy(x, lng, dec, base):
+            a, b, c = _float[0](x, lng, dec, base)
+            if b: b = fround(b, dec, base)
+            return a, b, c
+        split_float = dummy
+    else:
+        split_float = _float[0]
+
     format_float = _float[1](lng, dec, base)
     float_func = lambda x: format_float(*split_float(x, lng, dec, base))
 
