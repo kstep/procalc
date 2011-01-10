@@ -2,6 +2,7 @@
 
 import gobject
 import gtk
+import dbus
 import hildon
 
 from procalc import operations
@@ -85,25 +86,46 @@ class ProCalcApp(hildon.Program):
         self._ninput = None
         self._sinput = ''
 
+        self._portrait_mode = False
+        self._orientation_mode = 0
+
+    def init_dbus(self):
+        from dbus.mainloop.glib import DBusGMainLoop
+        DBusGMainLoop(set_as_default=True)
+
+        self._bus = dbus.SystemBus()
+        slider = self._bus.get_object('org.freedesktop.Hal', '/org/freedesktop/Hal/devices/platform_slide')
+        self._slider = dbus.Interface(slider, dbus_interface='org.freedesktop.Hal.Device')
+
+        def handler(n, s):
+            if self.orientation_mode == 2 \
+                    and s[0][0] == 'button.state.value':
+                self.portrait_mode = self.is_portrait
+
+        self._slider.connect_to_signal('PropertyModified', handler)
+
     def __init__(self):
         super(ProCalcApp, self).__init__()
 
         # 0. set state attributes
         self.init_state()
 
-        # 1. init stack
+        # 1. init dbus event listeners
+        self.init_dbus()
+
+        # 2. init stack
         self.init_stack()
 
-        # 2. create window
+        # 3. create window
         self.init_window()
 
-        # 3. init main controls
+        # 4. init main controls
         self.init_controls()
 
-        # 4. place controls into layout
+        # 5. place controls into layout
         self.init_layout()
 
-        # 5. init main menu
+        # 6. init main menu
         self.init_menu()
 
     def quit(self, *args):
@@ -134,7 +156,7 @@ class ProCalcApp(hildon.Program):
         nums = liststore(*range(-1, 65))
         menu.append(picker('Precision', self.hit_change_precision, selector(nums, nums)))
 
-        menu.append(button('Portrait', self.hit_switch_portrait, 'toggle'))
+        menu.append(picker('Orientation', self.hit_change_orientation, 'Landscape', 'Portrait', 'Automatic'))
         menu.append(button('About', self.show_about_info))
         return menu
 
@@ -158,26 +180,61 @@ Author: Konstantin Stepanov, © 2010
         self._conv.set_precision(*b.get_value().split(':'))
         self.update_view()
 
-    def hit_switch_portrait(self, b):
-        flags = 0
-        if b.get_active():
-            flags = hildon.PORTRAIT_MODE_SUPPORT | \
-                    hildon.PORTRAIT_MODE_REQUEST
-            new_parent = self.w_portrait_box
-            old_parent = self.w_landscape_box
-        else:
-            old_parent = self.w_portrait_box
-            new_parent = self.w_landscape_box
+    @property
+    def is_portrait(self):
+        return self._slider.GetProperty("button.state.value")
 
-        hildon.hildon_gtk_window_set_portrait_flags(self.window, flags)
+    def portrait_mode(self):
+        return self._portrait_mode
 
-        self.w_panner.reparent(new_parent)
-        self.w_keypad[0].reparent(new_parent)
-        self.w_keypad[1].reparent(new_parent)
-        transpose_table(self.w_keypad[1])
+    def set_portrait_mode(self, value):
+        value = bool(value)
+        if value != self._portrait_mode:
+            self._portrait_mode = value
+            flags = 0
 
-        old_parent.hide()
-        new_parent.show()
+            if value:
+                flags = hildon.PORTRAIT_MODE_SUPPORT | \
+                        hildon.PORTRAIT_MODE_REQUEST
+                new_parent = self.w_portrait_box
+                old_parent = self.w_landscape_box
+
+            else:
+                old_parent = self.w_portrait_box
+                new_parent = self.w_landscape_box
+
+            hildon.hildon_gtk_window_set_portrait_flags(self.window, flags)
+
+            self.w_panner.reparent(new_parent)
+            self.w_keypad[0].reparent(new_parent)
+            self.w_keypad[1].reparent(new_parent)
+            transpose_table(self.w_keypad[1])
+
+            old_parent.hide()
+            new_parent.show()
+
+    portrait_mode = property(portrait_mode, set_portrait_mode)
+
+    def orientation_mode(self):
+        return self._orientation_mode
+
+    def set_orientation_mode(self, value):
+        self._orientation_mode = int(value)
+
+        if self._orientation_mode == 0:  # Landscape
+            is_portrait = False
+        elif self._orientation_mode == 1:  # Portrait
+            is_portrait = True
+        else:  # Automatic
+            is_portrait = self.is_portrait
+
+        self.portrait_mode = is_portrait
+
+    orientation_mode = property(orientation_mode, set_orientation_mode)
+
+    def hit_change_orientation(self, b):
+        new_mode = ['Landscape', 'Portrait', 'Automatic'].index(b.get_value())
+        self.orientation_mode = new_mode
 
     def hit_execute(self, b):
         self.stack_push_op()
