@@ -121,7 +121,7 @@ class Converter(object):
 
     def __init__(self):
         sign = r'([+-])'
-        number = r'(0x|0o|0b)?([0-9A-F]+)?(?:\.([0-9A-F]+))?(?:([pe])([+-]?[0-9A-F]+))?'
+        number = r'(0x|0o|0b)?([0-9A-F]+)?(?:\.([0-9A-F]+))?(?:e([+-]?[0-9A-F]+))?'
         snumber = sign + '?' + number
         inumber = snumber + 'j'
         cnumber = snumber + sign + number + 'j'
