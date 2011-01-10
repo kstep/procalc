@@ -18,7 +18,7 @@ def bin(n):
     while n:
         r = str(n & 1) + r
         n >>= 1
-    return n
+    return r
 
 def repack(x, f, t):
     return struct.unpack(t, struct.pack(f, x))[0]
