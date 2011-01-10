@@ -514,8 +514,10 @@ Author: Konstantin Stepanov, © 2010
 
         # Stack operations
         hooks = [self.hit_push_stack, self.hit_pop_stack]
-        for i, c in enumerate((u'st↓', u'st↑')):
-            b = button(c, hooks[i])
+        for i, c in enumerate((('st↓', 'dup'), ('st↑', 'st↕'))):
+            b = button(c[0], hooks[i], 'mode')
+            b.set_labels(c[0], c[0], c[1], c[1])
+            self.connect('mode-changed', b.change_mode)
             buttons_box1.attach(b, i + 3, i + 4, 4, 5)
 
         # Binary operations
