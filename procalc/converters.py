@@ -13,8 +13,9 @@ def strd(d):
 def noop(n):
     return n
 
-def bin(n):
+def bin(x):
     r = ''
+    n = int(x)
     while n:
         r = str(n & 1) + r
         n >>= 1
