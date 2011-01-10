@@ -10,6 +10,7 @@ from procalc.operations import OperationError
 from procalc.stack import OpStack, StackError
 from procalc.helpers import button, switch, picker, selector, liststore, transpose_table
 from procalc.converters import Converter
+from procalc.config import Config
 
 class ProCalcApp(hildon.Program):
 
@@ -104,6 +105,15 @@ class ProCalcApp(hildon.Program):
 
         self._slider.connect_to_signal('PropertyModified', handler)
 
+    def init_config(self):
+        self._config = Config()
+        self._config.load()
+
+        self.orientation_mode = self._config['orientation']
+        self._conv.set_precision(*self._config['precision'].split(':'))
+        self._conv.set_mode(self._config['view_mode'])
+        self._conv.set_base(self._config['base'])
+
     def __init__(self):
         super(ProCalcApp, self).__init__()
 
@@ -125,38 +135,35 @@ class ProCalcApp(hildon.Program):
         # 5. place controls into layout
         self.init_layout()
 
-        # 6. init main menu
+        # 6. init config
+        self.init_config()
+
+        # 7. init main menu
         self.init_menu()
 
     def quit(self, *args):
+        self._config['orientation'] = self.orientation_mode
+        self._config['precision'] = '%d:%d' % (self._conv._length, self._conv._decimals)
+        self._config['view_mode'] = self._conv._mode
+        self._config['base'] = self._conv._base
+        self._config.save()
         gtk.main_quit()
 
     def create_menu(self):
         menu = hildon.AppMenu()
-        switch(menu, 2, self.hit_switch_base, 'Bin', 'Oct', 'Dec', 'Hex')
+        switch(menu, [2, 8, 10, 16].index(self._conv._base), self.hit_switch_base, 'Bin', 'Oct', 'Dec', 'Hex')
 
-        # TODO
-        # Integer - bit-wise operations on floats are as on ints,
-        # tend to work in integers, except one of operands is float,
-        # division always converts to float,
-        # Float - bit-wise operations on floats are as on bit arrays,
-        # all numbers tend to be converted to floats,
-        # Raw - like float, but show inner binary representation
-        # of floats in non-decimal modes, doesn't make sense for
-        # integers as integers are always in "raw" format.
-        #menu.append(picker('Format', None, 'Integer', 'Float', 'Raw'))
-        menu.append(picker('View mode', self.hit_change_view, 'Normal', 'Raw', 'Base exp'))
+        menu.append(picker('View mode', (self._conv._mode,), self.hit_change_view, 'Normal', 'Raw', 'Base exp'))
 
-        # TODO
         # First number is minimal integer part length to pad to with
         # zeroes (-1 means no leading zero for numbers less than 1),
         # second number is number of digits left after decimal
         # point (0 means always work with integers, -1 - no rounding
         # is applied).
         nums = liststore(*range(-1, 65))
-        menu.append(picker('Precision', self.hit_change_precision, selector(nums, nums)))
+        menu.append(picker('Precision', (self._conv._length + 1, self._conv._decimals + 1), self.hit_change_precision, selector(nums, nums)))
 
-        menu.append(picker('Orientation', self.hit_change_orientation, 'Landscape', 'Portrait', 'Automatic'))
+        menu.append(picker('Orientation', (self.orientation_mode,), self.hit_change_orientation, 'Landscape', 'Portrait', 'Automatic'))
         menu.append(button('About', self.show_about_info))
         return menu
 

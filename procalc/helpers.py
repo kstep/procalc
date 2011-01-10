@@ -35,14 +35,16 @@ def selector(*columns):
 
     return select
 
-def picker(label, onclicked=None, *items):
+def picker(label, defaults, onclicked=None, *items):
     if len(items) == 1 and isinstance(items[0], hildon.TouchSelector):
         selector = items[0]
     else:
         selector = hildon.TouchSelector(text=True)
         for i in items:
             selector.append_text(str(i))
-        selector.set_active(0, 0)
+
+    for i, default in enumerate(defaults):
+        selector.set_active(i, default)
 
     button = hildon.PickerButton(gtk.HILDON_SIZE_THUMB_HEIGHT, hildon.BUTTON_ARRANGEMENT_HORIZONTAL)
     button.set_title(label)
