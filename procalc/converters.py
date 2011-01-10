@@ -3,22 +3,119 @@ from __future__ import division
 
 import math
 import struct
-import __builtin__ as core
 import re
 
-def strdig(d):
+# Base functions
+
+def strd(d):
     return str(d) if d < 10 else chr(d + 55)
 
 def noop(n):
     return n
 
-class IntComplex(complex):
-    def __init__(self, real, imag):
-        self.real = int(real)
-        self.imag = int(imag)
+def bin(n):
+    r = ''
+    while n:
+        r = str(n & 1) + r
+        n >>= 1
+    return n
 
-    def __str__(self):
-        return "(%d%+dj)" % (self.real, self.imag)
+def repack(x, f, t):
+    return struct.unpack(t, struct.pack(f, x))[0]
+
+def raw(x):
+    if isinstance(x, float):
+        f, t = 'd', 'Q'
+
+    elif isinstance(x, (int, long)):
+        if x > 0:
+            return x
+        f, t = 'q', 'Q'
+
+    return repack(x, f, t)
+
+def fbconv(x, base, prec=100):
+    r = ''
+    while x and len(r) < prec:
+        x, a = math.modf(x * base)
+        r += strd(int(a))
+    return r
+
+def bfrexp(x, base, lng=0):
+    power = int(math.log(abs(x), base)) - lng + 1
+    return x / base ** power, power
+
+# Formatter generators
+
+format_char = {16: ('X', '0x', None), 10: ('d', '', None), 8: ('o', '0o', None), 2: ('s', '0b', bin)}
+
+def format_func1(lng, dec, base):
+    char, pfx, func = format_char.get(base)
+    format = '%%s%s%%0%d%s' % (pfx, lng, char)
+    if func:
+        return lambda a, b, c: (format % ('-' if a < 0 else '', func(abs(a)))).replace(' ', '0')
+    else:
+        return lambda a, b, c: (format % ('-' if a < 0 else '', abs(a))).replace(' ', '0')
+
+def format_func2(lng, dec, base):
+    char, pfx, func = format_char.get(base)
+    format = '%%s%s%%0%d%s.%%-0%ds' % (pfx, lng, char, dec)
+    if func:
+        return lambda a, b, c: (format % ('-' if a < 0 else '', func(abs(a)), fbconv(func(b), base))).replace(' ', '0')
+    else:
+        return lambda a, b, c: (format % ('-' if a < 0 else '', abs(a), fbconv(b, base))).replace(' ', '0')
+
+def format_func3(lng, dec, base):
+    char, pfx, func = format_char.get(base)
+    format = '%%s%s%%0%d%s.%%-0%dse%%%s' % (pfx, lng, char, dec, char)
+    if func:
+        return lambda a, b, c: (format % ('-' if a < 0 else '', func(abs(a)), fbconv(func(b), base)), func(c)).replace(' ', '0')
+    else:
+        return lambda a, b, c: (format % ('-' if a < 0 else '', abs(a), fbconv(b, base), c)).replace(' ', '0')
+
+# Splitters
+
+def splitn1(x, lng, dec, base):
+    return x, 0, 0
+
+def splitraw(x, lng, dec, base):
+    return raw(x), 0, 0
+
+def splitn3(x, lng, dec, base):
+    num, exp = bfrexp(x, base, lng)
+    frac, intg = math.modf(num)
+    return intg, abs(frac), exp
+
+def splitn2(x, lng, dec, base):
+    frac, intg = math.modf(x)
+    return intg, abs(frac), 0
+
+mode_func = [
+        [(splitn1, format_func1), (splitn2, format_func2)],
+        [(splitraw, format_func1), (splitraw, format_func1)],
+        [(splitn3, format_func3), (splitn3, format_func3)],
+        ]
+
+def format_func(mode, lng, dec, base):
+    _int, _float  = mode_func[mode]
+
+    split_int = _int[0]
+    format_int = _int[1](lng, dec, base)
+    int_func = lambda x: format_int(*split_int(x, lng, dec, base))
+
+    split_float = _float[0]
+    format_float = _float[1](lng, dec, base)
+    float_func = lambda x: format_float(*split_float(x, lng, dec, base))
+
+    complex_func = lambda x: '%s+%sj' % (float_func(x.real), float_func(x.imag))
+
+    formatters = {
+            int: int_func,
+            long: int_func,
+            float: float_func,
+            complex: complex_func,
+            }
+    return lambda x: formatters.get(type(x))(x)
 
 class Converter(object):
 
@@ -33,57 +130,27 @@ class Converter(object):
         self._recnum = re.compile('^' + cnumber + '$')
         self._reinum = re.compile('^' + inumber + '$')
 
-        self._precision = (-1, -1)
-        self._base = 10
         self._mode = 0
-
-        self.set_precision(-1, -1)
-        self.set_base(10)
-        self.set_mode(0)
-
-    def set_precision(self, integ, fract):
-        integ, fract = int(integ), int(fract)
-        self._precision = (integ, fract)
-        self._adjust_pipe = (
-                noop if integ < 1 else lambda n: n.lstrip('0').rjust(integ, '0'),
-                noop if fract < 1 else lambda n: n.rstrip('0').ljust(fract, '0')
-                )
+        self._length = -1
+        self._decimals = -1
+        self._base = 10
+        self._formatter = format_func(0, -1, -1, 10)
 
     def set_mode(self, mode):
-        '''
-        0 - normal,
-        1 - raw,
-        2 - base exp,
-        3 - binary exp.
-        '''
-        mode = int(mode)
-        self._mode = mode
-        self._exponent_pipe = [
-                lambda n: (n, 0),
-                lambda n: (raw(n), 0),
-                self.split_exponent,
-                lambda n: self.split_exponent(*math.frexp(n))
-                ][mode]
-        if mode == 3:
-            self._exp_delim = 'p'
-            self._exp_base = 2
-        else:
-            self._exp_delim = 'e'
-            self._exp_base = self._base
+        self._mode = int(mode)
+        self._generate_formatter()
+
+    def set_precision(self, length, decimals):
+        self._length = int(length)
+        self._decimals = int(decimals)
+        self._generate_formatter()
 
     def set_base(self, base):
-        self._prefix = {2: '0b', 8: '0o', 10: '', 16: '0x'}.get(base)
-        self._convert_pipe = {
-                2: lambda n: bin(n).lstrip('0b').rstrip('L'),
-                8: lambda n: oct(n).lstrip('0').rstrip('L'),
-                10: lambda n: str(n).rstrip('L'),
-                16: lambda n: hex(n).lstrip('0x').rstrip('L').upper()
-                }.get(int(base))
-        self._base = base
-        self._bits = nbits(base - 1)
-        if self._mode != 3:
-            self._exp_base = base
-            self._exp_delim = 'e'
+        self._base = int(base)
+        self._generate_formatter()
+
+    def _generate_formatter(self):
+        self._formatter = format_func(self._mode, self._length, self._decimals, self._base)
 
     def parse(self, s):
         '''
@@ -93,7 +160,7 @@ class Converter(object):
         if isinstance(s, (int, long, float, complex)):
             return s
 
-        def compose(sign, base, integer, fraction, expbase, exponent):
+        def compose(sign, base, integer, fraction, exponent):
             base = {'0x': 16, '0o': 8, '0b': 2}.get(base, 10)
             if base == 10:
                 for c in 'ABCDEF':
@@ -101,10 +168,8 @@ class Converter(object):
                         base = 16
                         break
 
-            expbase = expbase == 'p' and 2 or base
-
             if base == 10:
-                b = expbase ** int(exponent or '0', base)
+                b = base ** int(exponent or '0', base)
                 if fraction:
                     n = (sign or '') + (integer or '0') + '.' + (fraction or '0')
                     return float(n) * b
@@ -118,7 +183,7 @@ class Converter(object):
                 integer += sum(int(a, base) / base ** (i + 1) for i, a in enumerate(fraction))
 
             if exponent:
-                integer *= expbase ** int(exponent, base)
+                integer *= base ** int(exponent, base)
 
             return sign * integer
 
@@ -139,111 +204,5 @@ class Converter(object):
             return compose(*parsed.groups())
 
     def format(self, x):
-        if isinstance(x, complex):
-            return self.format(x.real) + ('-' if x.imag < 0 else '') + self.format(x.imag) + 'j'
-
-        number, exponent = self._exponent_pipe(x)
-        if exponent:
-            exponent = self._exp_delim + self._convert_pipe(exponent)
-        else:
-            exponent = ''
-
-        if isinstance(number, (int, long)):
-            return self.format_integer(number) + exponent
-
-        elif isinstance(number, float):
-            return self.format_float(number) + exponent
-
-        else:
-            raise ValueError('Expected int, long, float or complex, got %s' % type(x).__name__)
-
-    def format_integer(self, x):
-        return (x < 0 and '-' or '') + self._prefix + (self._adjust_pipe[0](self._convert_pipe(abs(x))) or '0')
-
-    def format_float(self, x):
-        fraction, integer = math.modf(x)
-        if self._base == 10:
-            fraction = str(fraction)[2:]
-
-        else:
-            align = self._base == 8 and 54 or 52
-            fraction = int(abs(fraction) * 2 ** align)
-            fraction = self._convert_pipe(fraction).rjust(align // self._bits, '0').rstrip('0')
-
-        fraction = self._adjust_pipe[1](fraction) or '0'
-        return self.format_integer(int(integer)) + '.' + fraction
-
-    def repack(self, x, f, t):
-        return struct.unpack(t, struct.pack(f, x))[0]
-
-    def raw(self, x):
-        if isinstance(x, float):
-            f, t = 'd', 'Q'
-
-        elif isinstance(x, (int, long)):
-            if x > 0:
-                return x
-            f, t = 'q', 'Q'
-
-        elif isinstance(x, complex):
-            return IntComplex(self.raw(x.real), self.raw(x.imag))
-
-        return self.repack(x, f, t)
-
-    def split_exponent(self, x, p=0):
-        power = int(math.log(x, self._exp_base)) - abs(self._precision[0])
-        if power > 0:
-            power += 1
-        return x / self._exp_base ** power, p + power
-
-def nbits(n):
-    '''
-    Get number of bits in integer number.
-
-    >>> bits(10)
-    4
-    '''
-    c = 0
-    while n:
-        c += 1
-        n >>= 1
-    return c
-
-def bin(i):
-    r = ''
-    while i:
-        r = str(i & 1) + r
-        i >>= 1
-    r = '0b' + (r or '0')
-    if i < 0:
-        r = '-' + r
-    return r
-
-def fint(x):
-    '''
-    >>> fint(10.0)
-    4621819117588971520L
-    '''
-    if isinstance(x, float):
-        return struct.unpack('Q', struct.pack('d', x))[0]
-    else:
-        return int(x)
-
-def intf(x):
-    '''
-    >>> intf(4621819117588971520L)
-    10.0
-    '''
-    if isinstance(x, (int, long)):
-        return struct.unpack('d', struct.pack('Q', x))[0]
-    else:
-        return x
-
-def sint(x):
-    if x < 0:
-        return int(x)
-    return struct.unpack('q', struct.pack('Q', int(x)))[0]
-
-def uint(x):
-    return struct.unpack('Q', struct.pack('q', int(x)))[0]
+        return self._formatter(x)
 
