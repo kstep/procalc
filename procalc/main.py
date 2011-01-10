@@ -109,6 +109,7 @@ class ProCalcApp(hildon.Program):
         self._config = Config()
         self._config.load()
 
+        self._orientation_mode = int(self._config['orientation'])
         self._conv.set_precision(*self._config['precision'].split(':'))
         self._conv.set_mode(self._config['view_mode'])
         self._conv.set_base(self._config['base'])
