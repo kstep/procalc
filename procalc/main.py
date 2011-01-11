@@ -110,9 +110,9 @@ class ProCalcApp(hildon.Program):
         self._config.load()
 
         self._orientation_mode = int(self._config['orientation'])
-        self._conv.set_precision(*self._config['precision'].split(':'))
-        self._conv.set_mode(self._config['view_mode'])
-        self._conv.set_base(self._config['base'])
+        self._conv.precision = self._config['precision'].split(':')
+        self._conv.mode = self._config['view_mode']
+        self._conv.base = self._config['base']
 
     def __init__(self):
         super(ProCalcApp, self).__init__()
@@ -143,17 +143,17 @@ class ProCalcApp(hildon.Program):
 
     def quit(self, *args):
         self._config['orientation'] = self.orientation_mode
-        self._config['precision'] = '%d:%d' % (self._conv._length, self._conv._decimals)
-        self._config['view_mode'] = self._conv._mode
-        self._config['base'] = self._conv._base
+        self._config['precision'] = '%d:%d' % self._conv.precision
+        self._config['view_mode'] = self._conv.mode
+        self._config['base'] = self._conv.base
         self._config.save()
         gtk.main_quit()
 
     def create_menu(self):
         menu = hildon.AppMenu()
-        switch(menu, [2, 8, 10, 16].index(self._conv._base), self.hit_switch_base, 'Bin', 'Oct', 'Dec', 'Hex')
+        switch(menu, [2, 8, 10, 16].index(self._conv.base), self.hit_switch_base, 'Bin', 'Oct', 'Dec', 'Hex')
 
-        menu.append(picker('View mode', (self._conv._mode,), self.hit_change_view, 'Normal', 'Raw', 'Base exp'))
+        menu.append(picker('View mode', (self._conv.mode,), self.hit_change_view, 'Normal', 'Raw', 'Base exp'))
 
         # First number is minimal integer part length to pad to with
         # zeroes (-1 means no leading zero for numbers less than 1),
@@ -161,7 +161,7 @@ class ProCalcApp(hildon.Program):
         # point (0 means always work with integers, -1 - no rounding
         # is applied).
         nums = liststore(*range(-1, 65))
-        menu.append(picker('Precision', (self._conv._length + 1, self._conv._decimals + 1), self.hit_change_precision, selector(nums, nums)))
+        menu.append(picker('Precision', map(lambda x: x + 1, self._conv.precision), self.hit_change_precision, selector(nums, nums)))
 
         menu.append(picker('Orientation', (self.orientation_mode,), self.hit_change_orientation, 'Landscape', 'Portrait', 'Automatic'))
         menu.append(button('About', self.show_about_info))
@@ -184,7 +184,7 @@ Author: Konstantin Stepanov, © 2010
         return self._conv.format(value)
 
     def hit_change_precision(self, b):
-        self._conv.set_precision(*b.get_value().split(':'))
+        self._conv.precision = b.get_value().split(':')
         self.update_view()
 
     @property
@@ -310,7 +310,7 @@ Author: Konstantin Stepanov, © 2010
 
     def hit_switch_base(self, b):
         base_name = b.get_label()
-        self._conv.set_base(dict(Bin=2, Oct=8, Dec=10, Hex=16).get(base_name, 10))
+        self._conv.base = dict(Bin=2, Oct=8, Dec=10, Hex=16).get(base_name, 10)
         self.update_view()
 
     def hit_mode(self, b):
@@ -326,7 +326,7 @@ Author: Konstantin Stepanov, © 2010
             self.add_input('e')
 
     def hit_change_view(self, b):
-        self._conv.set_mode(['Normal', 'Raw', 'Base exp'].index(b.get_value()))
+        self._conv.mode = ['Normal', 'Raw', 'Base exp'].index(b.get_value())
         self.update_view()
 
     def hit_keyboard(self, w, ev):
