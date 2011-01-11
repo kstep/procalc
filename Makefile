@@ -28,8 +28,11 @@ uninstall:
 clean:
 	find . -name "*.py[co]" | xargs rm -f 
 
+debclean: clean
+	rm -rf .pc debian/patches debian/procalc debian/procalc.*
+
 tarball:
 	VERSION=`git describe --tags HEAD || git rev-parse --short HEAD`; \
 	git archive --format=tar HEAD | gzip -9 > ../procalc_$$VERSION.orig.tar.gz
 
-.PHONY: compile install clean uninstall tarball
+.PHONY: compile install clean debclean uninstall tarball
