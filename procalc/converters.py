@@ -204,8 +204,8 @@ class Converter(object):
             parsed = self._recnum.match(s)
             if parsed:
                 parts = parsed.groups()
-                real = compose(*parts[0:6])
-                imag = compose(*parts[6:12])
+                real = compose(*parts[0:5])
+                imag = compose(*parts[5:10])
             else:
                 parsed = self._reinum.match(s)
                 real = 0
