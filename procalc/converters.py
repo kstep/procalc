@@ -120,7 +120,7 @@ def format_func(mode, lng, dec, base):
     format_float = _float[1](lng, dec, base)
     float_func = lambda x: format_float(*split_float(x, lng, dec, base))
 
-    complex_func = lambda x: '%s+%sj' % (float_func(x.real), float_func(x.imag))
+    complex_func = lambda x: '%s%s%sj' % (float_func(x.real), '' if x.imag < 0 else '+', float_func(x.imag))
 
     formatters = {
             int: int_func,
