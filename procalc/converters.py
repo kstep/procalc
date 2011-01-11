@@ -149,18 +149,33 @@ class Converter(object):
         self._base = 10
         self._formatter = format_func(0, -1, -1, 10)
 
+    def mode(self):
+        return self._mode
+
     def set_mode(self, mode):
         self._mode = int(mode)
         self._generate_formatter()
 
-    def set_precision(self, length, decimals):
-        self._length = int(length)
-        self._decimals = int(decimals)
+    mode = property(mode, set_mode)
+
+    def precision(self):
+        return (self._length, self._decimals)
+
+    def set_precision(self, prec):
+        self._length = int(prec[0])
+        self._decimals = int(prec[1])
         self._generate_formatter()
+
+    precision = property(precision, set_precision)
+
+    def base(self):
+        return self._base
 
     def set_base(self, base):
         self._base = int(base)
         self._generate_formatter()
+
+    base = property(base, set_base)
 
     def _generate_formatter(self):
         self._formatter = format_func(self._mode, self._length, self._decimals, self._base)
