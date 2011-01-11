@@ -17,7 +17,7 @@ install: compile
 	install -o root -g root -m 0644 ./menu/procalc.desktop $(DESKTOP)/procalc.desktop
 	for r in 128 64 48 32; do \
 		install -o root -g root -m 0644 ./menu/icons/procalc-$$r.png $(ICONS)/$${r}x$${r}/apps/procalc.png; done
-	gtk-update-icon-cache -f $(ICONS)
+	-gtk-update-icon-cache -f $(ICONS)
 
 uninstall:
 	rm -rf $(PYMODULES)/procalc
@@ -28,4 +28,8 @@ uninstall:
 clean:
 	find . -name "*.py[co]" | xargs rm -f 
 
-.PHONY: compile install clean uninstall
+tarball:
+	VERSION=`git describe --tags HEAD || git rev-parse --short HEAD`; \
+	git archive --format=tar HEAD | gzip -9 > ../procalc_$$VERSION.orig.tar.gz
+
+.PHONY: compile install clean uninstall tarball
