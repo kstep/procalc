@@ -317,7 +317,7 @@ Author: Konstantin Stepanov, © 2010
 
     def hit_switch_base(self, b):
         base_name = b.get_label()
-        self._conv.base = dict(Bin=2, Oct=8, Dec=10, Hex=16).get(base_name, 10)
+        self._conv.base = dict(Bin=2, Oct=8, Dec=10, Hex=16, Auto=-1).get(base_name, 10)
         self.update_view()
 
     def hit_mode(self, b):

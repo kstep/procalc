@@ -147,6 +147,7 @@ class Converter(object):
         self._length = -1
         self._decimals = -1
         self._base = 10
+        self._autobase = False
         self._formatter = format_func(0, -1, -1, 10)
 
     def mode(self):
@@ -172,7 +173,10 @@ class Converter(object):
         return self._base
 
     def set_base(self, base):
-        self._base = int(base)
+        base = int(base)
+        self._autobase = base < 0
+        if not self._autobase:
+            self._base = base
         self._generate_formatter()
 
     base = property(base, set_base)
@@ -195,6 +199,10 @@ class Converter(object):
                     if c in s:
                         base = 16
                         break
+
+            if self._autobase:
+                self._base = base
+                self._generate_formatter()
 
             if base == 10:
                 b = base ** int(exponent or '0', base)
