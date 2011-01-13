@@ -98,12 +98,17 @@ class ProCalcApp(hildon.Program):
         slider = self._bus.get_object('org.freedesktop.Hal', '/org/freedesktop/Hal/devices/platform_slide')
         self._slider = dbus.Interface(slider, dbus_interface='org.freedesktop.Hal.Device')
 
-        def handler(n, s):
-            if self.orientation_mode == 2 \
-                    and s[0][0] == 'button.state.value':
-                self.portrait_mode = self.is_portrait
+        def slider_handler(n, state):
+            if self.orientation_mode > 1:
+                if state[0][0] == 'button.state.value':
+                    self.portrait_mode = self.is_slider_closed
 
-        self._slider.connect_to_signal('PropertyModified', handler)
+        def accel_handler(orientation, stand, face, x, y, z):
+            if self.orientation_mode == 3 and self.is_slider_closed:
+                self.portrait_mode = orientation.startswith('portrait')
+
+        self._slider.connect_to_signal('PropertyModified', slider_handler)
+        self._bus.add_signal_receiver(accel_handler, 'sig_device_orientation_ind', 'com.nokia.mce.signal')
 
     def init_config(self):
         self._config = Config()
@@ -163,7 +168,8 @@ class ProCalcApp(hildon.Program):
         nums = liststore(*range(-1, 65))
         menu.append(picker('Precision', map(lambda x: x + 1, self._conv.precision), self.hit_change_precision, selector(nums, nums)))
 
-        menu.append(picker('Orientation', (self.orientation_mode,), self.hit_change_orientation, 'Landscape', 'Portrait', 'Automatic'))
+        menu.append(picker('Orientation', (self.orientation_mode,), self.hit_change_orientation,
+            'Landscape', 'Portrait', 'Automatic (keyboard)', 'Automatic (accel)'))
         menu.append(button('About', self.show_about_info))
         return menu
 
@@ -188,7 +194,7 @@ Author: Konstantin Stepanov, © 2010
         self.update_view()
 
     @property
-    def is_portrait(self):
+    def is_slider_closed(self):
         return self._slider.GetProperty("button.state.value")
 
     def portrait_mode(self):
@@ -198,19 +204,16 @@ Author: Konstantin Stepanov, © 2010
         value = bool(value)
         if value != self._portrait_mode:
             self._portrait_mode = value
-            flags = 0
 
             if value:
-                flags = hildon.PORTRAIT_MODE_SUPPORT | \
-                        hildon.PORTRAIT_MODE_REQUEST
+                flags = hildon.PORTRAIT_MODE_SUPPORT | hildon.PORTRAIT_MODE_REQUEST
                 new_parent = self.w_portrait_box
                 old_parent = self.w_landscape_box
 
             else:
+                flags = hildon.PORTRAIT_MODE_SUPPORT if self._orientation_mode > 1 else 0
                 old_parent = self.w_portrait_box
                 new_parent = self.w_landscape_box
-
-            hildon.hildon_gtk_window_set_portrait_flags(self.window, flags)
 
             self.w_panner.reparent(new_parent)
             self.w_keypad[0].reparent(new_parent)
@@ -219,6 +222,8 @@ Author: Konstantin Stepanov, © 2010
 
             old_parent.hide()
             new_parent.show()
+
+            hildon.hildon_gtk_window_set_portrait_flags(self.window, flags)
 
     portrait_mode = property(portrait_mode, set_portrait_mode)
 
@@ -230,17 +235,19 @@ Author: Konstantin Stepanov, © 2010
 
         if self._orientation_mode == 0:  # Landscape
             is_portrait = False
+
         elif self._orientation_mode == 1:  # Portrait
             is_portrait = True
+
         else:  # Automatic
-            is_portrait = self.is_portrait
+            is_portrait = self.is_slider_closed
 
         self.portrait_mode = is_portrait
 
     orientation_mode = property(orientation_mode, set_orientation_mode)
 
     def hit_change_orientation(self, b):
-        new_mode = ['Landscape', 'Portrait', 'Automatic'].index(b.get_value())
+        new_mode = ['Landscape', 'Portrait', 'Automatic (keyboard)', 'Automatic (accel)'].index(b.get_value())
         self.orientation_mode = new_mode
 
     def hit_execute(self, b):
