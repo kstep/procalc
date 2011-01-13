@@ -169,7 +169,7 @@ class ProCalcApp(hildon.Program):
         menu.append(picker('Precision', map(lambda x: x + 1, self._conv.precision), self.hit_change_precision, selector(nums, nums)))
 
         menu.append(picker('Orientation', (self.orientation_mode,), self.hit_change_orientation,
-            'Landscape', 'Portrait', 'Automatic (keyboard)', 'Automatic (accel)'))
+            'Landscape', 'Portrait', 'Automatic (slider)', 'Automatic (accel)'))
         menu.append(button('About', self.show_about_info))
         return menu
 
@@ -247,7 +247,7 @@ Author: Konstantin Stepanov, © 2010
     orientation_mode = property(orientation_mode, set_orientation_mode)
 
     def hit_change_orientation(self, b):
-        new_mode = ['Landscape', 'Portrait', 'Automatic (keyboard)', 'Automatic (accel)'].index(b.get_value())
+        new_mode = ['Landscape', 'Portrait', 'Automatic (slider)', 'Automatic (accel)'].index(b.get_value())
         self.orientation_mode = new_mode
 
     def hit_execute(self, b):
