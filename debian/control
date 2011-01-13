@@ -1,5 +1,5 @@
 Source: procalc
-Section: math 
+Section: user/utilities
 Priority: extra
 Maintainer: Konstantin Stepanov <kstep@p-nut.info>
 Build-Depends: debhelper (>= 7.0.50~), python (>= 2.5)
