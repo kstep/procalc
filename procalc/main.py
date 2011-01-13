@@ -156,7 +156,7 @@ class ProCalcApp(hildon.Program):
 
     def create_menu(self):
         menu = hildon.AppMenu()
-        switch(menu, [2, 8, 10, 16].index(self._conv.base), self.hit_switch_base, 'Bin', 'Oct', 'Dec', 'Hex')
+        switch(menu, [2, 8, 10, 16, -1].index(self._conv.base), self.hit_switch_base, 'Bin', 'Oct', 'Dec', 'Hex', 'Auto')
 
         menu.append(picker('View mode', (self._conv.mode,), self.hit_change_view, 'Normal', 'Raw', 'Base exp'))
 
