@@ -170,6 +170,9 @@ class Converter(object):
     precision = property(precision, set_precision)
 
     def base(self):
+        return -1 if self._autobase else self._base
+
+    def realbase(self):
         return self._base
 
     def set_base(self, base):
