@@ -28,6 +28,7 @@ uninstall:
 
 clean:
 	find . -name "*.py[co]" | xargs rm -f 
+	cd ./i18n && $(MAKE) clean
 
 debclean: clean
 	rm -rf .pc debian/patches debian/files debian/procalc debian/procalc.*

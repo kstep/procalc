@@ -2,7 +2,7 @@
 DESTDIR ?= 
 I18N ?= $(DESTDIR)/usr/share/locale
 
-all: en/LC_MESSAGES/procalc.mo ru/LC_MESSAGES/procalc.mo
+compile: en/LC_MESSAGES/procalc.mo ru/LC_MESSAGES/procalc.mo
 
 procalc.pot: ../procalc/*.py
 	pygettext -p . -d procalc ../procalc
@@ -16,8 +16,11 @@ en/LC_MESSAGES/procalc.mo: en/LC_MESSAGES/procalc.po
 ru/LC_MESSAGES/procalc.mo: ru/LC_MESSAGES/procalc.po
 	msgfmt -o $@ $<
 
-install: all
+install: compile
 	for f in `find . -name procalc.mo`; do \
 		install -o root -g root -m 0644 $$f $(I18N)/$$f; done
 
-.PHONY: all
+clean:
+	rm -f ./procalc.pot ./ru/LC_MESSAGES/procalc.mo ./en/LC_MESSAGES/procalc.mo
+
+.PHONY: compile clean install
