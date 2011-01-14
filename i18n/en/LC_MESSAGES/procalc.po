@@ -5,14 +5,14 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: procalc\n"
-"POT-Creation-Date: 2011-01-14 14:59+EET\n"
+"POT-Creation-Date: 2011-01-15 01:07+EET\n"
 "PO-Revision-Date: 2011-01-14 15:02+0200\n"
 "Last-Translator: Konstantin Stepanov <kstep@p-nut.info>\n"
 "Language-Team: English\n"
-"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
 "Generated-By: pygettext.py 1.5\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
@@ -93,6 +93,10 @@ msgstr ""
 "without any warranty.\n"
 "\n"
 "Author: Konstantin Stepanov, © 2010"
+
+#: ../procalc/main.py:282
+msgid "Press 2, 8, 0 or A to select base"
+msgstr "Press 2, 8, 0 or A to select base"
 
 #: ../procalc/operations.py:37
 msgid "Arguments type mismatch for %s(%s)"

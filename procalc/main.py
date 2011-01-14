@@ -279,7 +279,7 @@ Author: Konstantin Stepanov, (c) 2010"""))
                 self.input = text
                 self.is_mode = False
             else:
-                self.message('Press 2, 8, 0 or A to select base', 2000)
+                self.message(_(u'Press 2, 8, 0 or A to select base'), 2000)
         else:
             self.add_input(b.get_label())
 
