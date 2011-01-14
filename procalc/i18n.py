@@ -24,5 +24,9 @@ from gettext import translation
 
 __all__ = ['_']
 
-_i18n = translation('procalc', './i18n')
+try:
+    _i18n = translation('procalc')
+except IOError:
+    _i18n = translation('procalc', './i18n')
+
 _ = _i18n.ugettext
