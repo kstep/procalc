@@ -5,16 +5,24 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2011-01-14 13:56+EET\n"
-"PO-Revision-Date: 2011-01-14 14:11+0200\n"
+"POT-Creation-Date: 2011-01-14 14:27+EET\n"
+"PO-Revision-Date: 2011-01-14 14:31+0200\n"
 "Last-Translator: Konstantin Stepanov <kstep@p-nut.info>\n"
 "Language-Team: English\n"
+"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
-"Language: en\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../procalc/main.py:34
+msgid "Empty value"
+msgstr "Empty value"
+
+#: ../procalc/main.py:39 ../procalc/stack.py:45
+msgid "Stack is empty"
+msgstr "Stack is empty"
 
 #: ../procalc/main.py:178
 msgid ""
@@ -37,3 +45,19 @@ msgstr ""
 "without any warranty.\n"
 "\n"
 "Author: Konstantin Stepanov, © 2010"
+
+#: ../procalc/operations.py:37
+msgid "Arguments type mismatch for %s(%s)"
+msgstr "Arguments type mismatch for %s(%s)"
+
+#: ../procalc/operations.py:67
+msgid "Argument type mismatch for %s(%s, ...)"
+msgstr "Argument type mismatch for %s(%s, ...)"
+
+#: ../procalc/stack.py:28
+msgid "Unknown operation %s"
+msgstr "Unknown operation %s"
+
+#: ../procalc/stack.py:35
+msgid "No empty values allowed on the stack"
+msgstr "No empty values allowed on the stack"

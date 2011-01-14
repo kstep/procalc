@@ -6,6 +6,7 @@ import dbus
 import hildon
 
 from procalc import operations
+from procalc.i18n import _
 from procalc.operations import OperationError
 from procalc.stack import OpStack, StackError
 from procalc.helpers import button, switch, picker, selector, liststore, transpose_table
@@ -30,12 +31,12 @@ class ProCalcApp(hildon.Program):
         stack = hildon.TextView()
         input = hildon.Entry(gtk.HILDON_SIZE_AUTO)
 
-        input.set_placeholder('Empty value')
+        input.set_placeholder(_(u'Empty value'))
         input.set_properties(
                 hildon_input_mode=gtk.HILDON_GTK_INPUT_MODE_ALPHA
                 | gtk.HILDON_GTK_INPUT_MODE_NUMERIC
                 | gtk.HILDON_GTK_INPUT_MODE_SPECIAL)
-        stack.set_placeholder('Stack is empty')
+        stack.set_placeholder(_(u'Stack is empty'))
         stack.set_properties(editable=False)
 
         self.w_stack = stack
@@ -174,8 +175,7 @@ class ProCalcApp(hildon.Program):
         return menu
 
     def show_about_info(self, b):
-        self.note("""
-Programmer's calculator, v0.1
+        self.note(_(u"""Programmer's calculator, v0.1
 
 RPN calculator with bit-wise operations
 and infix operators emulation.
@@ -183,8 +183,7 @@ and infix operators emulation.
 Distributed AS IS under GPLv3 or greater
 without any warranty.
 
-Author: Konstantin Stepanov, © 2010
-                """)
+Author: Konstantin Stepanov, (c) 2010"""))
 
     def filter(self, value):
         return self._conv.format(value)
