@@ -1,4 +1,7 @@
 
+DESTDIR ?= 
+I18N ?= $(DESTDIR)/usr/share/locale
+
 all: en/LC_MESSAGES/procalc.mo ru/LC_MESSAGES/procalc.mo
 
 procalc.pot: ../procalc/*.py
@@ -12,5 +15,9 @@ en/LC_MESSAGES/procalc.mo: en/LC_MESSAGES/procalc.po
 
 ru/LC_MESSAGES/procalc.mo: ru/LC_MESSAGES/procalc.po
 	msgfmt -o $@ $<
+
+install: all
+	for f in `find . -name procalc.mo`; do \
+		install -o root -g root -m 0644 $$f $(I18N)/$$f; done
 
 .PHONY: all

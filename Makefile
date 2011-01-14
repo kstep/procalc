@@ -15,6 +15,7 @@ install: compile
 	for f in `find ./procalc -name "*.pyo"`; do \
 		install -o root -g root -m 0644 $$f $(PYMODULES)/$$f; done
 	install -o root -g root -m 0644 ./menu/procalc.desktop $(DESKTOP)/procalc.desktop
+	cd ./i18n && $(MAKE) install DESTDIR=$(DESTDIR)
 	for r in 128 64 48 32; do \
 		install -o root -g root -m 0644 ./menu/icons/procalc-$$r.png $(ICONS)/$${r}x$${r}/apps/procalc.png; done
 	-gtk-update-icon-cache -f $(ICONS)
