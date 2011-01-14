@@ -1,3 +1,5 @@
+from procalc.i18n import _
+
 function = type(lambda: 1)
 
 class StackError(Exception):
@@ -23,14 +25,14 @@ class OpStack(object):
         try:
             return self._ops[opname]
         except KeyError:
-            raise StackError('Unknown operation %s' % opname)
+            raise StackError(_(u'Unknown operation %s') % opname)
 
     def has_op(self, opname):
         return opname in self._ops
 
     def norm(self, value):
         if value is None or value == '':
-            raise StackError('No empty values allowed on the stack')
+            raise StackError(_(u'No empty values allowed on the stack'))
         return self._ops.get(value, None) or self._guard(value)
 
     def pop(self, index=0):
@@ -40,7 +42,7 @@ class OpStack(object):
         try:
             text = self._stack.pop(index)
         except IndexError:
-            raise StackError('Stack is empty')
+            raise StackError(_(u'Stack is empty'))
         return text
 
     def push(self, data, index=0):

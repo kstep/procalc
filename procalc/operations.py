@@ -1,5 +1,6 @@
 # coding: utf-8
 from __future__ import division
+from procalc.i18n import _
 
 import math
 
@@ -33,7 +34,7 @@ def operation(name, prio, *types):
                 for t in rtypes:
                     args.insert(0, t(stack.pop_op()))
             except ValueError:
-                raise OperationError("Arguments type mismatch for %s(%s)" % (name, ", ".join(map(lambda t: t.__name__, types))))
+                raise OperationError(_(u"Arguments type mismatch for %s(%s)") % (name, ", ".join(map(lambda t: t.__name__, types))))
 
             result = func(*args)
             if result is None:
@@ -63,7 +64,7 @@ def operation_for_list(name, prio, type_):
                         break
                     args.insert(0, type_(item))
             except ValueError:
-                raise OperationError("Argument type mismatch for %s(%s, ...)" % (name, type_.__name__))
+                raise OperationError(_(u"Argument type mismatch for %s(%s, ...)") % (name, type_.__name__))
 
             result = func(*args)
             if result is None:
