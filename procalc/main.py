@@ -585,12 +585,12 @@ Author: Konstantin Stepanov, (c) 2010"""))
             buttons_box2.attach(b, 0, 1, i, i + 1)
 
         # Stack operations
-        hooks = [self.hit_push_stack, self.hit_pop_stack]
-        for i, c in enumerate((('st↓', 'dup'), ('st↑', 'st↕'))):
+        hooks = [self.hit_pop_stack, self.hit_push_stack]
+        for i, c in enumerate((('st↑', 'st↕'), ('st↓', 'dup'))):
             b = button(c[0], hooks[i], 'mode')
             b.set_labels(c[0], c[0], c[1], c[1])
             self.connect('mode-changed', b.change_mode)
-            buttons_box1.attach(b, i + 3, i + 4, 4, 5)
+            buttons_box2.attach(b, 2, 3, 3 + i, 4 + i)
 
         # Binary operations
         for i, c in enumerate(('^', '&~', '&', '~', '|')):
@@ -603,7 +603,8 @@ Author: Konstantin Stepanov, (c) 2010"""))
 
         # Execute
         b = button('=', self.hit_execute)
-        buttons_box2.attach(b, 2, 3, 3, 5)
+        buttons_box1.attach(b, 3, 5, 4, 5)
+        #buttons_box1.attach(b, 2, 3, 3, 5)
 
         # Special mode keys
         b = button('Mod', self.hit_mode, 'toggle')
