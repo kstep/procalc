@@ -16,8 +16,8 @@ from procalc.config import Config
 class ProCalcApp(hildon.Program):
 
     __bases = {'Bin': 2, 'Oct': 8, 'Dec': 10, 'Hex': 16, _(u'Auto'): -1}
-    __view_modes = (_(u'Normal'), _(u'Raw'), _(u'Base exp'))
-    __orientations = (_(u'Landscape'), _(u'Portrait'), _(u'Automatic (slider)'), _(u'Automatic (accel)'))
+    __view_modes = [_(u'Normal'), _(u'Raw'), _(u'Base exp')]
+    __orientations = [_(u'Landscape'), _(u'Portrait'), _(u'Automatic (slider)'), _(u'Automatic (accel)')]
 
     __gsignals__ = {
             'mode-changed': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, (int,))
