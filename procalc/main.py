@@ -15,6 +15,10 @@ from procalc.config import Config
 
 class ProCalcApp(hildon.Program):
 
+    __bases = {'Bin': 2, 'Oct': 8, 'Dec': 10, 'Hex': 16, _(u'Auto'): -1}
+    __view_modes = (_(u'Normal'), _(u'Raw'), _(u'Base exp'))
+    __orientations = (_(u'Landscape'), _(u'Portrait'), _(u'Automatic (slider)'), _(u'Automatic (accel)'))
+
     __gsignals__ = {
             'mode-changed': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, (int,))
             }
@@ -157,9 +161,9 @@ class ProCalcApp(hildon.Program):
 
     def create_menu(self):
         menu = hildon.AppMenu()
-        switch(menu, [2, 8, 10, 16, -1].index(self._conv.base), self.hit_switch_base, 'Bin', 'Oct', 'Dec', 'Hex', 'Auto')
+        switch(menu, [2, 8, 10, 16, -1].index(self._conv.base), self.hit_switch_base, *self.__bases.keys())
 
-        menu.append(picker('View mode', (self._conv.mode,), self.hit_change_view, 'Normal', 'Raw', 'Base exp'))
+        menu.append(picker(_(u'View mode'), (self._conv.mode,), self.hit_change_view, *self.__view_modes))
 
         # First number is minimal integer part length to pad to with
         # zeroes (-1 means no leading zero for numbers less than 1),
@@ -167,11 +171,10 @@ class ProCalcApp(hildon.Program):
         # point (0 means always work with integers, -1 - no rounding
         # is applied).
         nums = liststore(*range(-1, 65))
-        menu.append(picker('Precision', map(lambda x: x + 1, self._conv.precision), self.hit_change_precision, selector(nums, nums)))
+        menu.append(picker(_(u'Precision'), map(lambda x: x + 1, self._conv.precision), self.hit_change_precision, selector(nums, nums)))
 
-        menu.append(picker('Orientation', (self.orientation_mode,), self.hit_change_orientation,
-            'Landscape', 'Portrait', 'Automatic (slider)', 'Automatic (accel)'))
-        menu.append(button('About', self.show_about_info))
+        menu.append(picker(_(u'Orientation'), (self.orientation_mode,), self.hit_change_orientation, *self.__orientations))
+        menu.append(button(_(u'About'), self.show_about_info))
         return menu
 
     def show_about_info(self, b):
@@ -246,7 +249,7 @@ Author: Konstantin Stepanov, (c) 2010"""))
     orientation_mode = property(orientation_mode, set_orientation_mode)
 
     def hit_change_orientation(self, b):
-        new_mode = ['Landscape', 'Portrait', 'Automatic (slider)', 'Automatic (accel)'].index(b.get_value())
+        new_mode = self.__orientations.index(b.get_value())
         self.orientation_mode = new_mode
 
     def hit_execute(self, b):
@@ -316,7 +319,7 @@ Author: Konstantin Stepanov, (c) 2010"""))
 
     def hit_switch_base(self, b):
         base_name = b.get_label()
-        self._conv.base = dict(Bin=2, Oct=8, Dec=10, Hex=16, Auto=-1).get(base_name, 10)
+        self._conv.base = self.__bases.get(base_name, 10)
         self.update_view()
 
     def hit_mode(self, b):
@@ -332,7 +335,7 @@ Author: Konstantin Stepanov, (c) 2010"""))
             self.add_input('e')
 
     def hit_change_view(self, b):
-        self._conv.mode = ['Normal', 'Raw', 'Base exp'].index(b.get_value())
+        self._conv.mode = self.__view_modes.index(b.get_value())
         self.update_view()
 
     def hit_keyboard(self, w, ev):

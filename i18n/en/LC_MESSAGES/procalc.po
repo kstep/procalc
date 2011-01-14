@@ -4,9 +4,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2011-01-14 14:27+EET\n"
-"PO-Revision-Date: 2011-01-14 14:31+0200\n"
+"Project-Id-Version: procalc\n"
+"POT-Creation-Date: 2011-01-14 14:59+EET\n"
+"PO-Revision-Date: 2011-01-14 15:02+0200\n"
 "Last-Translator: Konstantin Stepanov <kstep@p-nut.info>\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -16,15 +16,63 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../procalc/main.py:34
+#: ../procalc/main.py:18
+msgid "Auto"
+msgstr "Auto"
+
+#: ../procalc/main.py:19
+msgid "Base exp"
+msgstr "Base exp"
+
+#: ../procalc/main.py:19
+msgid "Normal"
+msgstr "Normal"
+
+#: ../procalc/main.py:19
+msgid "Raw"
+msgstr "Raw"
+
+#: ../procalc/main.py:20
+msgid "Automatic (accel)"
+msgstr "Automatic (accel)"
+
+#: ../procalc/main.py:20
+msgid "Automatic (slider)"
+msgstr "Automatic (slider)"
+
+#: ../procalc/main.py:20
+msgid "Landscape"
+msgstr "Landscape"
+
+#: ../procalc/main.py:20
+msgid "Portrait"
+msgstr "Portrait"
+
+#: ../procalc/main.py:38
 msgid "Empty value"
 msgstr "Empty value"
 
-#: ../procalc/main.py:39 ../procalc/stack.py:45
+#: ../procalc/main.py:43 ../procalc/stack.py:45
 msgid "Stack is empty"
 msgstr "Stack is empty"
 
-#: ../procalc/main.py:178
+#: ../procalc/main.py:166
+msgid "View mode"
+msgstr "View mode"
+
+#: ../procalc/main.py:174
+msgid "Precision"
+msgstr "Precision"
+
+#: ../procalc/main.py:176
+msgid "Orientation"
+msgstr "Orientation"
+
+#: ../procalc/main.py:177
+msgid "About"
+msgstr "About"
+
+#: ../procalc/main.py:181
 msgid ""
 "Programmer's calculator, v0.1\n"
 "\n"
