@@ -318,7 +318,7 @@ Author: Konstantin Stepanov, (c) 2010"""))
                 self.message(e.message.capitalize(), 2000)
 
     def hit_switch_base(self, b):
-        base_name = b.get_label()
+        base_name = unicode(b.get_label())
         self._conv.base = self.__bases.get(base_name, 10)
         self.update_view()
 
@@ -535,12 +535,13 @@ Author: Konstantin Stepanov, (c) 2010"""))
         self.w_buffer.set_text(self.stack.as_str(self.filter))
 
     def message(self, text, timeout=500):
-        banner = hildon.hildon_banner_show_information(self.window, '', text)
+        banner = hildon.hildon_banner_show_information(self.window, '',
+                str(text))
         banner.set_timeout(timeout)
         return banner
 
     def note(self, text):
-        banner = hildon.hildon_note_new_information(self.window, text)
+        banner = hildon.hildon_note_new_information(self.window, str(text))
         banner.connect('response', lambda s, ev: s.destroy())
         banner.show()
         return banner
