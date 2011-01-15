@@ -329,7 +329,10 @@ Author: Konstantin Stepanov, (c) 2010"""))
         self.emit('mode-changed', self.is_mode + (b.get_active() and 2))
 
     def hit_power(self, b):
-        if self.is_mode:
+        if self.is_func:
+            self.input = '[‥]'
+            self.opmode = True
+        elif self.is_mode:
             self.add_input('j')
         else:
             self.add_input('e')
@@ -594,18 +597,28 @@ Author: Konstantin Stepanov, (c) 2010"""))
             buttons_box2.attach(b, 2, 3, 3 + i, 4 + i)
 
         # Binary operations
-        for i, c in enumerate(('^', '&~', '&', '~', '|')):
-            b = button(c, self.hit_opkey)
+        for i, c in enumerate((
+            ('^', 'sin', 'sinh', 'asin'),
+            ('&~', 'cos', 'cosh', 'acos'),
+            ('&', 'tan', 'tanh', 'atan'),
+            ('~', 'cot', 'atg2', 'acot'),
+            ('|', '1/x', '%', '%'))):
+            b = button(c[0], self.hit_opkey, 'mode')
+            b.set_labels(*c)
+            self.connect('mode-changed', b.change_mode)
             buttons_box2.attach(b, 1, 2, i, i + 1)
 
-        for i, c in enumerate(('<<', '>>')):
-            b = button(c, self.hit_opkey)
+        for i, c in enumerate((
+            ('<<', 'log', 'π'),
+            ('>>', 'ln', 'e'))):
+            b = button(c[0], self.hit_opkey, 'mode')
+            b.set_labels(c[0], c[1], c[2], c[2])
+            self.connect('mode-changed', b.change_mode)
             buttons_box2.attach(b, 2, 3, i, i + 1)
 
         # Execute
         b = button('=', self.hit_execute)
         buttons_box1.attach(b, 3, 5, 4, 5)
-        #buttons_box1.attach(b, 2, 3, 3, 5)
 
         # Special mode keys
         b = button('Mod', self.hit_mode, 'toggle')
@@ -617,7 +630,7 @@ Author: Konstantin Stepanov, (c) 2010"""))
         buttons_box1.attach(b, 4, 5, 0, 1)
 
         b = button('×Bⁿ', self.hit_power, 'mode')
-        b.set_labels('×Bⁿ', '+bj', '×Bⁿ', '+bj')
+        b.set_labels('×Bⁿ', '+bj', 'list', 'list')
         self.connect('mode-changed', b.change_mode)
         buttons_box2.attach(b, 2, 3, 2, 3)
 
