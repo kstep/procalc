@@ -1,3 +1,26 @@
+procalc (0.3-1) unstable; urgency=low
+
+  * Next release:
+
+    Konstantin Stepanov (15):
+          autobase interface and config option
+          desktop file: categories and version options fixed
+          basic i18n files
+          localization (WIP)
+          gitignore pot & mo files
+          localization: makefile install
+          makefiles: i18n clean target
+          menu i18n & l10n
+          translation domain search
+          lists instead of tuples for menu labels
+          i18n files update
+          buttons reordered in a nicer way
+          autobase setup and notifications are more robust
+          ops: trigs, consts, lists, mod, inv
+          modified shunting yard algo to sort ops on the stack
+
+ -- Konstantin Stepanov <kstep@p-nut.info>  Sat, 15 Jan 2011 16:40:20 +0200
+
 procalc (0.2-1) unstable; urgency=low
 
   * Next release:
