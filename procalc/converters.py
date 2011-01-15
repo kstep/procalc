@@ -70,7 +70,7 @@ def format_func3(lng, dec, base):
     char, pfx, func = format_char.get(base)
     format = '%%s%s%%0%d%s.%%-0%dse%%%s' % (pfx, lng, char, dec, char)
     if func:
-        return lambda a, b, c: (format % ('-' if a < 0 else '', func(abs(a)), fbconv(b, base)), func(c)).replace(' ', '0')
+        return lambda a, b, c: (format % ('-' if a < 0 else '', func(abs(a)), fbconv(b, base), func(c))).replace(' ', '0')
     else:
         return lambda a, b, c: (format % ('-' if a < 0 else '', abs(a), fbconv(b, base), c)).replace(' ', '0')
 
