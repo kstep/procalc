@@ -80,6 +80,7 @@ class OpStack(object):
         Clear stack
         """
         self._stack = list()
+        self._opstack = list()
 
     __getitem__ = get
 
