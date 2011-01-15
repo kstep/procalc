@@ -85,6 +85,8 @@ def splitraw(x, lng, dec, base):
 def splitn3(x, lng, dec, base):
     num, exp = bfrexp(x, base, lng)
     frac, intg = math.modf(num)
+    if dec > -1:
+        frac = fround(frac, dec, base)
     return intg, abs(frac), exp
 
 def splitn2(x, lng, dec, base):
