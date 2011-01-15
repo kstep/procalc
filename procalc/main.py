@@ -213,7 +213,7 @@ Author: Konstantin Stepanov, (c) 2010"""))
                 old_parent = self.w_landscape_box
 
             else:
-                flags = hildon.PORTRAIT_MODE_SUPPORT if self._orientation_mode > 1 else 0
+                flags = hildon.PORTRAIT_MODE_SUPPORT if self._orientation_mode == 3 else 0
                 old_parent = self.w_portrait_box
                 new_parent = self.w_landscape_box
 
