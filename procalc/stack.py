@@ -10,9 +10,15 @@ class OpStack(object):
         self._ops = dict(((o.op_name, o) for o in ops))
         self._guard = guard or (lambda x: x)
         self._stack = list()
+        self._opstack = list()
 
     def as_str(self, filter_=str):
-        return '\n'.join(getattr(i, 'op_name', None) or filter_(i) for i in self._stack)
+        if self._opstack:
+            opstack = '[' + ', '.join(o.op_name for o in self._opstack) + ']\n'
+        else:
+            opstack = ''
+
+        return opstack + '\n'.join(getattr(i, 'op_name', None) or filter_(i) for i in self._stack)
 
     def add_op(self, op):
         self._ops[op.op_name] = op
@@ -80,41 +86,27 @@ class OpStack(object):
     def __setitem__(self, index, data):
         self.put(data, index)
 
-    def _get_push_operand_index(self):
-        idx, pri = 0, 0
-        for i, item in self:
-            opri = getattr(item, 'op_prio', 100)
-            if opri > pri:
-                pri = opri
-            else:
-                return i - 1 if pri == 100 else i
-            idx = i
-        return idx
-
-    def _get_push_operator_index(self, op):
-        idx, pri = 0, op.op_prio
-        for i, item in self:
-            if getattr(item, 'op_prio', 100) >= pri:
-                return i
-            idx = i
-        return idx
-
     def push_op(self, opname):
-        op = self._ops.get(opname, None)
+        op = self.norm(opname)
 
-        if op is None:
-            idx = self._get_push_operand_index()
+        if not isinstance(op, function):
+            self._stack.insert(0, op)
 
         else:
-            idx = self._get_push_operator_index(op)
+            while self._opstack and cmp(op.op_prio, self._opstack[0].op_prio) in op.op_asso:
+                self._stack.insert(0, self._opstack.pop(0))
 
-        self.push(opname, idx)
+            self._opstack.insert(0, op)
 
     def pop_op(self):
-        data = self.pop()
-        if isinstance(data, function):
+        while self._opstack:
+            self._stack.insert(0, self._opstack.pop(0))
+
+        data = self._stack.pop(0)
+        while isinstance(data, function):
             data(self)
-            data = self.pop()
+            data = self._stack.pop(0)
+
         return data
 
     def __iter__(self):

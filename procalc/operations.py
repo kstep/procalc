@@ -7,27 +7,30 @@ import math
 OP_PRIO_MIN = -100
 OP_PRIO_MAX = 100
 OP_PRIO_DEF = 0
+OP_ASSOC_LEFT = (-1, 0)
+OP_ASSOC_RIGHT = (-1,)
 
 __ops__ = []
 
 nan = float('nan')
 inf = float('inf')
-
-def native(x):
-    return x
+native = lambda x: x
 
 class OperationError(ValueError):
     pass
 
-def operation_on_stack(name, prio):
+def operation_on_stack(name, prio, assoc=OP_ASSOC_LEFT):
     def decorator(func):
         func.op_name = str(name)
         func.op_prio = int(prio)
+        func.op_asso = assoc
         __ops__.append(func)
         return func
     return decorator
 
-def operation(name, prio, *types):
+def operation(name, prio, *types, **kw):
+    assoc = kw.get('assoc', OP_ASSOC_LEFT)
+
     def decorator(func):
         rtypes = tuple(reversed(types))
 
@@ -50,13 +53,14 @@ def operation(name, prio, *types):
 
         wrapper.op_name = str(name)
         wrapper.op_prio = int(prio)
+        wrapper.op_asso = assoc
         wrapper.__name__ = func.__name__
         wrapper.__doc__ = func.__doc__
         __ops__.append(wrapper)
         return wrapper
     return decorator
 
-def operation_for_list(name, prio, type_):
+def operation_for_list(name, prio, type_, assoc=OP_ASSOC_LEFT):
     def decorator(func):
         def wrapper(stack):
             try:
@@ -80,6 +84,7 @@ def operation_for_list(name, prio, type_):
 
         wrapper.op_name = str(name)
         wrapper.op_prio = int(prio)
+        wrapper.op_asso = assoc
         wrapper.__name__ = func.__name__
         wrapper.__doc__ = func.__doc__
         __ops__.append(wrapper)
@@ -143,7 +148,7 @@ def op_div(a, b):
 def op_mod(a, b):
     return a % b
 
-@operation('↑', 3, native, native)
+@operation('↑', 3, native, native, assoc=OP_ASSOC_RIGHT)
 def op_pow(a, b):
     return a ** b
 
