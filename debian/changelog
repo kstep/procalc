@@ -1,3 +1,18 @@
+procalc (0.3.2-1) unstable; urgency=low
+
+  * Next release:
+
+    Konstantin Stepanov (7):
+          request accelerometer in auto (accel) mode only
+          fixed base exp formatter bug
+          fixed base exp mode rounding issue
+          a number of conversion fixes
+          decoupled version from about message
+          makefile: publish target
+          genchangelog script
+
+ -- Konstantin Stepanov <kstep@p-nut.info>  Sun, 16 Jan 2011 15:00:55 +0200
+
 procalc (0.3.1-1) unstable; urgency=low
 
   * Next release:
