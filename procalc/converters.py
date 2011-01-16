@@ -15,10 +15,12 @@ def noop(n):
 
 def bin(x):
     r = ''
-    n = int(x)
+    n = abs(int(x))
     while n:
         r = str(n & 1) + r
         n >>= 1
+    if x < 0:
+        return '-' + r
     return r
 
 def repack(x, f, t):
@@ -52,7 +54,7 @@ format_char = {16: ('X', '0x', None), 10: ('d', '', None), 8: ('o', '0o', None),
 
 def format_func1(lng, dec, base):
     char, pfx, func = format_char.get(base)
-    format = '%%s%s%%0%d%s' % (pfx, lng, char)
+    format = '%%s%s%%0%d%s' % (pfx, abs(lng), char)
     if func:
         return lambda a, b, c: (format % ('-' if a < 0 else '', func(abs(a)))).replace(' ', '0')
     else:
@@ -60,7 +62,7 @@ def format_func1(lng, dec, base):
 
 def format_func2(lng, dec, base):
     char, pfx, func = format_char.get(base)
-    format = '%%s%s%%0%d%s.%%-0%ds' % (pfx, lng, char, dec)
+    format = '%%s%s%%0%d%s.%%-0%ds' % (pfx, abs(lng), char, abs(dec))
     if func:
         return lambda a, b, c: (format % ('-' if a < 0 else '', func(abs(a)), fbconv(b, base))).replace(' ', '0')
     else:
@@ -68,7 +70,7 @@ def format_func2(lng, dec, base):
 
 def format_func3(lng, dec, base):
     char, pfx, func = format_char.get(base)
-    format = '%%s%s%%0%d%s.%%-0%dse%%%s' % (pfx, lng, char, dec, char)
+    format = '%%s%s%%0%d%s.%%-0%dse%%%s' % (pfx, abs(lng), char, abs(dec), char)
     if func:
         return lambda a, b, c: (format % ('-' if a < 0 else '', func(abs(a)), fbconv(b, base), func(c))).replace(' ', '0')
     else:
@@ -85,8 +87,6 @@ def splitraw(x, lng, dec, base):
 def splitn3(x, lng, dec, base):
     num, exp = bfrexp(x, base, lng)
     frac, intg = math.modf(num)
-    if dec > -1:
-        frac = fround(frac, dec, base)
     return intg, abs(frac), exp
 
 def splitn2(x, lng, dec, base):
@@ -103,22 +103,29 @@ mode_func = [
         [(splitn3, format_func3), (splitn3, format_func3)],
         ]
 
+def rounded(dec):
+    def decorator(func):
+        if dec < 0:
+            return func
+
+        if func is splitn1 or func is splitraw:
+            return func
+
+        def wrapper(x, lng, dec, base):
+            a, b, c = func(x, lng, dec, base)
+            if b: b = fround(b, dec, base)
+            return a, b, c
+        return wrapper
+    return decorator
+
 def format_func(mode, lng, dec, base):
     _int, _float  = mode_func[mode]
 
-    split_int = _int[0]
+    split_int = rounded(dec)(_int[0])
     format_int = _int[1](lng, dec, base)
     int_func = lambda x: format_int(*split_int(x, lng, dec, base))
 
-    if dec > -1:
-        def dummy(x, lng, dec, base):
-            a, b, c = _float[0](x, lng, dec, base)
-            if b: b = fround(b, dec, base)
-            return a, b, c
-        split_float = dummy
-    else:
-        split_float = _float[0]
-
+    split_float = rounded(dec)(_float[0])
     format_float = _float[1](lng, dec, base)
     float_func = lambda x: format_float(*split_float(x, lng, dec, base))
 
