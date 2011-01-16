@@ -37,4 +37,10 @@ tarball:
 	VERSION=`git describe --tags HEAD || git rev-parse --short HEAD`; \
 	git archive --format=tar HEAD | gzip -9 > ../procalc_$$VERSION.orig.tar.gz
 
-.PHONY: compile install clean debclean uninstall tarball
+publish:
+	test -z "$(V)" && exit 1
+	scp procalc_$(V)-*.tar.gz drop.maemo.org:/var/www/extras-devel/incoming-builder/fremantle
+	scp procalc_$(V)-*.changes drop.maemo.org:/var/www/extras-devel/incoming-builder/fremantle
+	scp procalc_$(V)-*.dsc drop.maemo.org:/var/www/extras-devel/incoming-builder/fremantle
+
+.PHONY: compile install clean debclean uninstall tarball publish
