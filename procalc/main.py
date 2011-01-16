@@ -13,6 +13,8 @@ from procalc.helpers import button, switch, picker, selector, liststore, transpo
 from procalc.converters import Converter
 from procalc.config import Config
 
+__version__ = '0.3.2'
+
 class ProCalcApp(hildon.Program):
 
     __bases = {'Bin': 2, 'Oct': 8, 'Dec': 10, 'Hex': 16, _(u'Auto'): -1}
@@ -178,7 +180,7 @@ class ProCalcApp(hildon.Program):
         return menu
 
     def show_about_info(self, b):
-        self.note(_(u"""Programmer's calculator, v0.1
+        self.note(_(u"""Programmer's calculator, v%(version)s
 
 RPN calculator with bit-wise operations
 and infix operators emulation.
@@ -186,7 +188,7 @@ and infix operators emulation.
 Distributed AS IS under GPLv3 or greater
 without any warranty.
 
-Author: Konstantin Stepanov, (c) 2010"""))
+Author: Konstantin Stepanov, (c) 2010""") % dict(version=__version__))
 
     def filter(self, value):
         return self._conv.format(value)
