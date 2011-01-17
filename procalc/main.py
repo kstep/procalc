@@ -588,7 +588,7 @@ Author: Konstantin Stepanov, (c) 2010""") % dict(version=__version__))
             b = button(str(c), self.hit_opkey, 'mode')
             b.set_labels(str(c), str(modes[i]), str(c), str(modes[i]))
             self.connect('mode-changed', b.change_mode)
-            buttons_box2.attach(b, 0, 1, i, i + 1)
+            buttons_box2.attach(b, 1, 2, i, i + 1)
 
         # Stack operations
         hooks = [self.hit_pop_stack, self.hit_push_stack]
@@ -596,7 +596,7 @@ Author: Konstantin Stepanov, (c) 2010""") % dict(version=__version__))
             b = button(c[0], hooks[i], 'mode')
             b.set_labels(c[0], c[0], c[1], c[1])
             self.connect('mode-changed', b.change_mode)
-            buttons_box2.attach(b, 2, 3, 3 + i, 4 + i)
+            buttons_box2.attach(b, 0, 1, 3 + i, 4 + i)
 
         # Binary operations
         for i, c in enumerate((
@@ -608,7 +608,7 @@ Author: Konstantin Stepanov, (c) 2010""") % dict(version=__version__))
             b = button(c[0], self.hit_opkey, 'mode')
             b.set_labels(*c)
             self.connect('mode-changed', b.change_mode)
-            buttons_box2.attach(b, 1, 2, i, i + 1)
+            buttons_box2.attach(b, 2, 3, i, i + 1)
 
         for i, c in enumerate((
             ('<<', 'log', 'π'),
@@ -616,7 +616,7 @@ Author: Konstantin Stepanov, (c) 2010""") % dict(version=__version__))
             b = button(c[0], self.hit_opkey, 'mode')
             b.set_labels(c[0], c[1], c[2], c[2])
             self.connect('mode-changed', b.change_mode)
-            buttons_box2.attach(b, 2, 3, i, i + 1)
+            buttons_box2.attach(b, 0, 1, i, i + 1)
 
         # Execute
         b = button('=', self.hit_execute)
@@ -634,7 +634,7 @@ Author: Konstantin Stepanov, (c) 2010""") % dict(version=__version__))
         b = button('×Bⁿ', self.hit_power, 'mode')
         b.set_labels('×Bⁿ', '+bj', 'list', 'list')
         self.connect('mode-changed', b.change_mode)
-        buttons_box2.attach(b, 2, 3, 2, 3)
+        buttons_box2.attach(b, 0, 1, 2, 3)
 
         # Edit keys
         b = button('C', self.hit_clear, 'mode')
