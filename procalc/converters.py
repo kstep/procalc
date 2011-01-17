@@ -48,7 +48,7 @@ def bfrexp(x, base, lng=0):
     if not x:
         return 0.0, 0
 
-    power = int(math.log(abs(x), base)) - lng + 1
+    power = int(round(math.log(abs(x), base))) - lng + int(x >= 1)
     return x / base ** power, power
 
 # Formatter generators
