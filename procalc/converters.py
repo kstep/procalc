@@ -45,6 +45,9 @@ def fbconv(x, base, prec=100):
     return r
 
 def bfrexp(x, base, lng=0):
+    if not x:
+        return 0.0, 0
+
     power = int(math.log(abs(x), base)) - lng + 1
     return x / base ** power, power
 
