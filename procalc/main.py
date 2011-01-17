@@ -13,7 +13,7 @@ from procalc.helpers import button, switch, picker, selector, liststore, transpo
 from procalc.converters import Converter
 from procalc.config import Config
 
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 
 class ProCalcApp(hildon.Program):
 
