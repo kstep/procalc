@@ -19,6 +19,21 @@ native = lambda x: x
 class OperationError(ValueError):
     pass
 
+def op_invoke(func, stack, args):
+    try:
+        result = func(*args)
+    except (ArithmeticError, ValueError), e:
+        raise OperationError(e.message.capitalize())
+
+    if result is None:
+        pass
+    elif isinstance(result, tuple):
+        for r in reversed(result):
+            stack.push(r)
+    else:
+        stack.push(result)
+
+
 def operation_on_stack(name, prio, assoc=OP_ASSOC_LEFT):
     def decorator(func):
         func.op_name = str(name)
@@ -42,14 +57,7 @@ def operation(name, prio, *types, **kw):
             except ValueError:
                 raise OperationError(_(u"Arguments type mismatch for %s(%s)") % (name, ", ".join(map(lambda t: t.__name__, types))))
 
-            result = func(*args)
-            if result is None:
-                pass
-            elif isinstance(result, tuple):
-                for r in reversed(result):
-                    stack.push(r)
-            else:
-                stack.push(result)
+            op_invoke(func, stack, args)
 
         wrapper.op_name = str(name)
         wrapper.op_prio = int(prio)
@@ -73,14 +81,7 @@ def operation_for_list(name, prio, type_, assoc=OP_ASSOC_LEFT):
             except ValueError:
                 raise OperationError(_(u"Argument type mismatch for %s(%s, ...)") % (name, type_.__name__))
 
-            result = func(*args)
-            if result is None:
-                pass
-            elif isinstance(result, tuple):
-                for r in reversed(result):
-                    stack.push(r)
-            else:
-                stack.push(result)
+            op_invoke(func, stack, args)
 
         wrapper.op_name = str(name)
         wrapper.op_prio = int(prio)
