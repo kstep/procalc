@@ -285,7 +285,7 @@ Author: Konstantin Stepanov, (c) 2010""") % dict(version=__version__))
                 self.input = text
                 self.is_mode = False
             else:
-                self.message(_(u'Press 2, 8, 0 or A to select base'), 2000)
+                self.message(_(u'Press 2, 8, 0 or A to select base'), 4000)
         else:
             self.add_input(b.get_label())
 
@@ -497,7 +497,7 @@ Author: Konstantin Stepanov, (c) 2010""") % dict(version=__version__))
                 self.ninput = None
 
         except (ConvertError, StackError), e:
-            self.message(e.message, 2000)
+            self.message(e.message, 4000)
 
     def stack_pop(self):
         try:
@@ -511,7 +511,7 @@ Author: Konstantin Stepanov, (c) 2010""") % dict(version=__version__))
             self.ninput = data
 
         except StackError, e:
-            self.message(e.message, 2000)
+            self.message(e.message, 4000)
 
     def stack_push_op(self):
         try:
@@ -520,7 +520,7 @@ Author: Konstantin Stepanov, (c) 2010""") % dict(version=__version__))
             self.ninput = None
 
         except ConvertError, e:
-            self.message(e.message, 2000)
+            self.message(e.message, 4000)
 
         except StackError:
             pass
@@ -530,7 +530,7 @@ Author: Konstantin Stepanov, (c) 2010""") % dict(version=__version__))
             self.ninput = self.stack.pop_op()
 
         except (StackError, OperationError), e:
-            self.message(e.message, 2000)
+            self.message(e.message, 4000)
 
         self.w_buffer.set_text(self.stack.as_str(self.filter))
 
