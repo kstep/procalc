@@ -5,6 +5,17 @@ import math
 import struct
 import re
 
+from procalc.i18n import _
+
+class ConvertError(ValueError):
+    pass
+
+class ConvertParseError(ConvertError):
+    pass
+
+class ConvertFormatError(ConvertError):
+    pass
+
 # Base functions
 
 def strd(d):
@@ -246,12 +257,16 @@ class Converter(object):
                 imag = compose(*parts[5:10])
             else:
                 parsed = self._reinum.match(s)
+                if not parsed:
+                    raise ConvertParseError(_(u'Incorrect complex number format'))
                 real = 0
                 imag = compose(*parsed.groups())
             return complex(real, imag)
 
         else:  # real
             parsed = self._renum.match(s)
+            if not parsed:
+                raise ConvertParseError(_(u'Incorrect real number format'))
             return compose(*parsed.groups())
 
     def format(self, x):
