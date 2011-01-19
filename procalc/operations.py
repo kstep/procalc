@@ -17,13 +17,29 @@ inf = float('inf')
 native = lambda x: x
 
 class OperationError(ValueError):
-    pass
+    def __init__(self, e):
+        if isinstance(e, Exception):
+            message = e.__doc__ or ''
+            if message.endswith('.'):
+                message = message[:-1] + ': '
+            message += e.message
+
+        else:
+            message = str(e)
+
+        if not message:
+            message = _(u'Unexpected operation error.')
+
+        if not message.endswith('.'):
+            message += '.'
+
+        super(OperationError, self).__init__(message.capitalize())
 
 def op_invoke(func, stack, args):
     try:
         result = func(*args)
     except (ArithmeticError, ValueError), e:
-        raise OperationError(e.message.capitalize())
+        raise OperationError(e)
 
     if result is None:
         pass
