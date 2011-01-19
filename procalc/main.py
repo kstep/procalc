@@ -18,6 +18,7 @@ __version__ = '0.3.3'
 class ProCalcApp(hildon.Program):
 
     __bases = {'Bin': 2, 'Oct': 8, 'Dec': 10, 'Hex': 16, _(u'Auto'): -1}
+    __bases_ordered = ('Bin', 'Oct', 'Dec', 'Hex', _(u'Auto'))
     __view_modes = [_(u'Normal'), _(u'Raw'), _(u'Base exp')]
     __orientations = [_(u'Landscape'), _(u'Portrait'), _(u'Automatic (slider)'), _(u'Automatic (accel)')]
 
@@ -163,7 +164,7 @@ class ProCalcApp(hildon.Program):
 
     def create_menu(self):
         menu = hildon.AppMenu()
-        switch(menu, [2, 8, 10, 16, -1].index(self._conv.base), self.hit_switch_base, *self.__bases.keys())
+        switch(menu, [2, 8, 10, 16, -1].index(self._conv.base), self.hit_switch_base, *self.__bases_ordered)
 
         menu.append(picker(_(u'View mode'), (self._conv.mode,), self.hit_change_view, *self.__view_modes))
 
