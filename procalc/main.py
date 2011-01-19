@@ -10,7 +10,7 @@ from procalc.i18n import _
 from procalc.operations import OperationError
 from procalc.stack import OpStack, StackError
 from procalc.helpers import button, switch, picker, selector, liststore, transpose_table
-from procalc.converters import Converter
+from procalc.converters import Converter, ConvertError
 from procalc.config import Config
 
 __version__ = '0.3.3'
@@ -192,7 +192,10 @@ without any warranty.
 Author: Konstantin Stepanov, (c) 2010""") % dict(version=__version__))
 
     def filter(self, value):
-        return self._conv.format(value)
+        try:
+            return self._conv.format(value)
+        except ConvertError, e:
+            self.message(e.message)
 
     def hit_change_precision(self, b):
         self._conv.precision = b.get_value().split(':')
@@ -315,10 +318,7 @@ Author: Konstantin Stepanov, (c) 2010""") % dict(version=__version__))
         self.w_buffer.set_text(self.stack.as_str(self.filter))
 
         if not self.opmode:
-            try:
-                self.ninput = self.ninput
-            except ValueError, e:
-                self.message(e.message.capitalize(), 2000)
+            self.ninput = self.ninput
 
     def hit_switch_base(self, b):
         base_name = unicode(b.get_label())
@@ -496,11 +496,8 @@ Author: Konstantin Stepanov, (c) 2010""") % dict(version=__version__))
             if not self.is_func:
                 self.ninput = None
 
-        except StackError, e:
+        except (ConvertError, StackError), e:
             self.message(e.message, 2000)
-
-        except ValueError, e:
-            self.message(e.message.capitalize(), 2000)
 
     def stack_pop(self):
         try:
@@ -522,8 +519,8 @@ Author: Konstantin Stepanov, (c) 2010""") % dict(version=__version__))
             self.w_buffer.set_text(self.stack.as_str(self.filter))
             self.ninput = None
 
-        except ValueError, e:
-            self.message(e.message.capitalize(), 2000)
+        except ConvertError, e:
+            self.message(e.message, 2000)
 
         except StackError:
             pass
@@ -531,9 +528,6 @@ Author: Konstantin Stepanov, (c) 2010""") % dict(version=__version__))
     def stack_pop_op(self):
         try:
             self.ninput = self.stack.pop_op()
-
-        except OperationError, e:
-            self.message(e.message, 2000)
 
         except (StackError, OperationError), e:
             self.message(e.message, 2000)
