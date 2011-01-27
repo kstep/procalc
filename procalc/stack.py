@@ -5,6 +5,9 @@ function = type(lambda: 1)
 class StackError(Exception):
     pass
 
+class StackUnderflowError(StackError, OverflowError):
+    pass
+
 class OpStack(object):
     def __init__(self, guard=None, *ops):
         self._ops = dict(((o.op_name, o) for o in ops))
@@ -48,7 +51,7 @@ class OpStack(object):
         try:
             text = self._stack.pop(index)
         except IndexError:
-            raise StackError(_(u'Stack is empty'))
+            raise StackUnderflowError(_(u'Stack is empty'))
         return text
 
     def push(self, data, index=0):
@@ -73,7 +76,10 @@ class OpStack(object):
         """
         Drop value from stack
         """
-        self._stack.pop(index)
+        try:
+            self._stack.pop(index)
+        except IndexError:
+            raise StackUnderflowError(_(u'Stack is empty'))
 
     def clear(self):
         """
@@ -103,10 +109,14 @@ class OpStack(object):
         while self._opstack:
             self._stack.insert(0, self._opstack.pop(0))
 
-        data = self._stack.pop(0)
-        while isinstance(data, function):
-            data(self)
+        try:
             data = self._stack.pop(0)
+            while isinstance(data, function):
+                data(self)
+                data = self._stack.pop(0)
+
+        except IndexError:
+            raise StackUnderflowError(_(u'Stack is empty'))
 
         return data
 
