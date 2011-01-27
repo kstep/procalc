@@ -406,7 +406,7 @@ Author: Konstantin Stepanov, (c) 2010""") % dict(version=__version__))
                 u'$': op_key(u'&~'), # and not
                 u'x': op_key(u'&~'), # and not
                 u'm': mod_key('is_mode'),
-                u'￣': mod_key('is_func'),
+                u'n': mod_key('is_func'),
                 u'h': act_key('hit_push_stack'),
                 u'j': act_key('hit_pop_stack'),
                 u'(': act_key('hit_push_stack'),
