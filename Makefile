@@ -12,7 +12,7 @@ compile:
 install: compile
 	install -o root -g root -m 0755 ./procalc.py $(PREFIX)/procalc
 	install -o root -g root -m 0755 -d $(PYMODULES)/procalc
-	for f in `find ./procalc -name "*.pyo"`; do \
+	for f in `find ./procalc -name "*.pyo" -o -name "*.py"`; do \
 		install -o root -g root -m 0644 $$f $(PYMODULES)/$$f; done
 	install -o root -g root -m 0644 ./menu/procalc.desktop $(DESKTOP)/procalc.desktop
 	cd ./i18n && $(MAKE) install DESTDIR=$(DESTDIR)
