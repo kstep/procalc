@@ -389,10 +389,10 @@ Author: Konstantin Stepanov, (c) 2010""") % dict(version=__version__))
                 u's': op_key(u'+'),
                 u'-': op_key(u'−'),
                 u'f': op_key(u'−'),
-                u'*': op_key(u'×'),
-                u'a': op_key(u'×'),
-                u'/': op_key(u'÷'),
-                u'v': op_key(u'÷'),
+                u'*': op_key(u'*'),
+                u'a': op_key(u'*'),
+                u'/': op_key(u'/'),
+                u'v': op_key(u'/'),
                 u'\\': op_key(u'↑'),
                 u'b': op_key(u'↑'),
                 u'&': op_key(u'&'), # and
@@ -579,7 +579,7 @@ Author: Konstantin Stepanov, (c) 2010""") % dict(version=__version__))
 
         # Basic operations
         modes = ('σ', 'μ', 'Π', 'gμ', 'Σ')
-        for i, c in enumerate(u'↑÷×−+'):
+        for i, c in enumerate(u'↑/*−+'):
             b = button(str(c), self.hit_opkey, 'mode')
             b.set_labels(str(c), str(modes[i]), str(c), str(modes[i]))
             self.connect('mode-changed', b.change_mode)

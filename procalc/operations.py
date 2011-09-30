@@ -153,11 +153,11 @@ def op_add(a, b):
 def op_sub(a, b):
     return a - b
 
-@operation('×', 2, native, native)
+@operation('*', 2, native, native)
 def op_mul(a, b):
     return a * b
 
-@operation('÷', 2, native, native)
+@operation('/', 2, native, native)
 def op_div(a, b):
     return a / b
 
